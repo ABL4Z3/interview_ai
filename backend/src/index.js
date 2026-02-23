@@ -91,10 +91,10 @@ const startServer = async () => {
       console.log(`✓ Frontend URL: ${env.FRONTEND_URL}`);
       console.log(`${'='.repeat(60)}\n`);
 
-      // Auto-start the LiveKit Python agent
-      if (env.LIVEKIT_API_KEY && env.LIVEKIT_API_SECRET) {
+      // Auto-start the LiveKit Python agent (development only)
+      if (env.isDevelopment && env.LIVEKIT_API_KEY && env.LIVEKIT_API_SECRET) {
         startAgent();
-      } else {
+      } else if (env.isDevelopment) {
         console.log('⚠️  LiveKit not configured, skipping agent auto-start.');
       }
     });
