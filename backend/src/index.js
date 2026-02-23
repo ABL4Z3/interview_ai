@@ -24,9 +24,29 @@ app.use(helmet({
   contentSecurityPolicy: env.isProduction ? undefined : false,
 }));
 app.use(cors({
-  origin: env.isProduction 
-    ? env.FRONTEND_URL 
-    : ['http://localhost:5173', 'http://localhost:3000', env.FRONTEND_URL],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      env.FRONTEND_URL,
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ].filter(Boolean);
+
+    // Also allow any *.vercel.app subdomain
+    const isVercel = origin.endsWith('.vercel.app');
+    const isAllowed = allowedOrigins.some(allowed =>
+      allowed && origin.startsWith(allowed.replace(/\/$/, ''))
+    );
+
+    if (isVercel || isAllowed) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '16mb' }));
