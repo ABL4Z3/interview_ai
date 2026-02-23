@@ -1,0 +1,14 @@
+# .gitignore for frontend
+node_modules/
+dist/
+build/
+.env.local
+.env.*.local
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.turbo/
