@@ -26,7 +26,7 @@ const plans = [
   {
     id: 'starter',
     name: 'Starter',
-    price: 499,
+    price: 1,
     period: '/month',
     description: 'For serious interview preparation',
     features: [
@@ -42,7 +42,7 @@ const plans = [
   {
     id: 'growth',
     name: 'Growth',
-    price: 999,
+    price: 2,
     period: '/month',
     description: 'Unlimited practice for job seekers',
     features: [

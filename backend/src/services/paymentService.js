@@ -23,14 +23,14 @@ function getRazorpay() {
 export const PLANS = {
   starter: {
     name: 'Starter',
-    price: 499, // INR
+    price: 1, // INR (TEST)
     interviews: 5,
     duration: 30, // days
     features: ['5 AI interviews/month', 'Detailed feedback', 'Score tracking'],
   },
   growth: {
     name: 'Growth',
-    price: 999, // INR
+    price: 2, // INR (TEST)
     interviews: 999, // unlimited
     duration: 30,
     features: ['Unlimited AI interviews', 'Detailed feedback', 'Score tracking', 'Priority support', 'Interview history'],
