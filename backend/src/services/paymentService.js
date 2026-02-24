@@ -51,7 +51,7 @@ export const createOrder = async (plan, userId) => {
   const options = {
     amount: planDetails.price * 100, // Razorpay expects paise
     currency: 'INR',
-    receipt: `order_${userId}_${Date.now()}`,
+    receipt: `r_${String(userId).slice(-8)}_${Date.now().toString().slice(-10)}`,
     notes: {
       userId,
       plan,
