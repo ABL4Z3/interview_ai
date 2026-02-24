@@ -34,6 +34,9 @@ const env = {
   LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET,
   AGENT_API_KEY: process.env.AGENT_API_KEY || '',
 
+  // Google OAuth
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+
   // JWT
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRE: process.env.JWT_EXPIRE || '7d',

@@ -62,3 +62,19 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* ========== Global Dark Mode ========== */
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+.dark .bg-gray-50 { background-color: #1f2937 !important; }
+.dark .bg-white   { background-color: #1f2937 !important; }
+.dark .text-gray-900 { color: #f9fafb !important; }
+.dark .text-gray-700 { color: #d1d5db !important; }
+.dark .text-gray-600 { color: #9ca3af !important; }
+.dark .border-gray-100,
+.dark .border-gray-200 { border-color: #374151 !important; }
+.dark .shadow-md,
+.dark .shadow-lg { box-shadow: 0 4px 6px -1px rgba(0,0,0,.5) !important; }
+

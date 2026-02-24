@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import { ApiResponse, ApiError, asyncHandler } from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
 import env from '../config/env.js';
+import { OAuth2Client } from 'google-auth-library';
 
 /**
  * Register a new user
@@ -15,6 +16,11 @@ export const register = asyncHandler(async (req, res) => {
   // Validation
   if (!name || !email || !password) {
     throw new ApiError(400, 'Name, email, and password are required');
+  }
+
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, 'Please enter a valid email address');
   }
 
   if (password.length < 8) {
@@ -71,6 +77,11 @@ export const login = asyncHandler(async (req, res) => {
     throw new ApiError(401, 'Invalid email or password');
   }
 
+  // Google-only accounts cannot use password login
+  if (user.googleId && !user.password) {
+    throw new ApiError(401, 'This account uses Google sign-in. Please continue with Google.');
+  }
+
   // Check password
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
@@ -116,6 +127,57 @@ export const getMe = asyncHandler(async (req, res) => {
       totalInterviews: user.totalInterviews,
       interviewsRemaining: user.interviewsRemaining,
     }, 'User retrieved successfully')
+  );
+});
+
+/**
+ * Google OAuth sign-in / sign-up
+ * @route POST /api/auth/google
+ * @body {credential} - Google ID token
+ */
+export const googleAuth = asyncHandler(async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) throw new ApiError(400, 'Google credential is required');
+  if (!env.GOOGLE_CLIENT_ID) throw new ApiError(503, 'Google OAuth not configured on server');
+
+  const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+  const ticket = await client.verifyIdToken({
+    idToken: credential,
+    audience: env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  const { sub: googleId, email, name, picture } = payload;
+
+  // Find or create user
+  let user = await User.findOne({ $or: [{ googleId }, { email }] });
+  if (!user) {
+    user = await User.create({
+      name,
+      email,
+      googleId,
+      profilePicture: picture,
+      password: `google_${googleId}_${Date.now()}`, // placeholder, never used
+    });
+  } else if (!user.googleId) {
+    // Link Google ID to existing email account
+    user.googleId = googleId;
+    if (!user.profilePicture) user.profilePicture = picture;
+    await user.save();
+  }
+
+  const token = jwt.sign(user.getJWT(), env.JWT_SECRET, { expiresIn: env.JWT_EXPIRE });
+
+  res.json(
+    new ApiResponse(200, {
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        subscriptionPlan: user.subscriptionPlan,
+        interviewsRemaining: user.interviewsRemaining,
+      },
+    }, 'Google sign-in successful')
   );
 });
 

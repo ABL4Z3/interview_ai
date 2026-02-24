@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthStore } from './store/authStore';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -25,6 +26,7 @@ function App() {
   }, [token]);
 
   return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -65,6 +67,7 @@ function App() {
         />
       </Routes>
     </Router>
+  </GoogleOAuthProvider>
   );
 }
 

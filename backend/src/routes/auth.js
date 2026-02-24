@@ -5,6 +5,7 @@ import {
   login,
   getMe,
   refreshToken,
+  googleAuth,
 } from '../controllers/authController.js';
 import verifyJWT from '../middleware/auth.js';
 
@@ -13,6 +14,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/google', googleAuth);
 
 // Protected routes
 router.get('/me', verifyJWT, getMe);
