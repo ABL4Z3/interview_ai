@@ -1,4 +1,7 @@
 // Main server entry point
+import { setDefaultResultOrder } from 'dns';
+setDefaultResultOrder('ipv4first'); // Force IPv4 — Railway does not support IPv6 outbound SMTP
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
