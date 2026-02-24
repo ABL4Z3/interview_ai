@@ -49,7 +49,14 @@ export const sendOTP = asyncHandler(async (req, res) => {
     { upsert: true, new: true }
   );
 
-  await sendOTPEmail(email, otp, name);
+  try {
+    await sendOTPEmail(email, otp, name);
+  } catch (emailErr) {
+    // Clean up the OTP record so they can retry cleanly
+    await OTPVerification.deleteOne({ email });
+    console.error('Email send failed:', emailErr.message);
+    throw new ApiError(503, `Failed to send email: ${emailErr.message}`);
+  }
 
   res.json(new ApiResponse(200, null, 'OTP sent to your email address'));
 });
