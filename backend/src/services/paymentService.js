@@ -68,8 +68,9 @@ export const createOrder = async (plan, userId) => {
       plan: planDetails,
     };
   } catch (error) {
-    console.error('Razorpay Order Creation Error:', error);
-    throw new ApiError(500, 'Failed to create payment order');
+    console.error('Razorpay Order Creation Error:', JSON.stringify(error, null, 2));
+    const razorpayMsg = error?.error?.description || error?.message || 'Unknown Razorpay error';
+    throw new ApiError(500, `Failed to create payment order: ${razorpayMsg}`);
   }
 };
 
