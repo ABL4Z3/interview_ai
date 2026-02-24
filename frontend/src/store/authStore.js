@@ -12,13 +12,26 @@ export const useAuthStore = create((set) => ({
     set({ token });
   },
 
-  register: async (email, password, name) => {
+  sendOTP: async (name, email, password) => {
+    set({ loading: true, error: null });
+    try {
+      await apiClient.post('/auth/send-otp', { name, email, password });
+      set({ loading: false });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to send OTP';
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  register: async (name, email, password, otp) => {
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post('/auth/register', {
         name,
         email,
         password,
+        otp,
       });
       const { token, user } = response.data.data;
       set({ token, currentUser: user, loading: false });

@@ -1,19 +1,20 @@
 // Authentication Controller - Phase 1
 import User from '../models/User.js';
+import OTPVerification from '../models/OTPVerification.js';
 import { ApiResponse, ApiError, asyncHandler } from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
 import env from '../config/env.js';
 import { OAuth2Client } from 'google-auth-library';
+import { sendOTPEmail } from '../services/emailService.js';
 
 /**
- * Register a new user
- * @route POST /api/auth/register
+ * Step 1: Send OTP to email before registration
+ * @route POST /api/auth/send-otp
  * @body {name, email, password}
  */
-export const register = asyncHandler(async (req, res) => {
+export const sendOTP = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
-  // Validation
   if (!name || !email || !password) {
     throw new ApiError(400, 'Name, email, and password are required');
   }
@@ -27,6 +28,70 @@ export const register = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Password must be at least 8 characters');
   }
 
+  // Check if already registered
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new ApiError(409, 'An account with this email already exists');
+  }
+
+  if (!env.EMAIL_USER || !env.EMAIL_PASS) {
+    throw new ApiError(503, 'Email service not configured on server');
+  }
+
+  // Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Upsert: allows resend
+  await OTPVerification.findOneAndUpdate(
+    { email },
+    { otp, expiresAt },
+    { upsert: true, new: true }
+  );
+
+  await sendOTPEmail(email, otp, name);
+
+  res.json(new ApiResponse(200, null, 'OTP sent to your email address'));
+});
+
+/**
+ * Step 2: Verify OTP and create account
+ * @route POST /api/auth/register
+ * @body {name, email, password, otp}
+ */
+export const register = asyncHandler(async (req, res) => {
+  const { name, email, password, otp } = req.body;
+
+  // Validation
+  if (!name || !email || !password || !otp) {
+    throw new ApiError(400, 'Name, email, password, and OTP are required');
+  }
+
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, 'Please enter a valid email address');
+  }
+
+  if (password.length < 8) {
+    throw new ApiError(400, 'Password must be at least 8 characters');
+  }
+
+  // Verify OTP
+  const otpRecord = await OTPVerification.findOne({ email });
+  if (!otpRecord) {
+    throw new ApiError(400, 'OTP not found or already used. Please request a new one.');
+  }
+  if (new Date() > otpRecord.expiresAt) {
+    await OTPVerification.deleteOne({ email });
+    throw new ApiError(400, 'OTP has expired. Please request a new one.');
+  }
+  if (otpRecord.otp !== otp.trim()) {
+    throw new ApiError(400, 'Incorrect OTP. Please try again.');
+  }
+
+  // Delete used OTP
+  await OTPVerification.deleteOne({ email });
+
   // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -34,11 +99,7 @@ export const register = asyncHandler(async (req, res) => {
   }
 
   // Create user
-  const user = await User.create({
-    name,
-    email,
-    password,
-  });
+  const user = await User.create({ name, email, password });
 
   // Generate JWT token
   const token = jwt.sign(user.getJWT(), env.JWT_SECRET, {
@@ -54,7 +115,7 @@ export const register = asyncHandler(async (req, res) => {
         email: user.email,
         subscriptionPlan: user.subscriptionPlan,
       },
-    }, 'User registered successfully')
+    }, 'Account created successfully')
   );
 });
 
