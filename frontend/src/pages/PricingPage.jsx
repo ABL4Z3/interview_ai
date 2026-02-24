@@ -59,7 +59,7 @@ const plans = [
 
 export function PricingPage() {
   const navigate = useNavigate();
-  const { token, currentUser } = useAuthStore();
+  const { token, currentUser, getMe } = useAuthStore();
   const [processing, setProcessing] = useState(null);
 
   const handleSelectPlan = async (planId) => {
@@ -93,6 +93,8 @@ export function PricingPage() {
               razorpayPaymentId: razorpayResponse.razorpay_payment_id,
               razorpaySignature: razorpayResponse.razorpay_signature,
             });
+            // Refresh user data so dashboard shows updated plan & interviews
+            await getMe();
             alert('Payment successful! Your plan has been upgraded.');
             navigate('/dashboard');
           } catch (err) {
