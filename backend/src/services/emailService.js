@@ -2,11 +2,34 @@ import nodemailer from 'nodemailer';
 import env from '../config/env.js';
 
 const createTransporter = () => {
+  const user = env.EMAIL_USER || '';
+
+  // Detect provider from EMAIL_USER and use explicit host/port + force IPv4
+  const isOutlook = user.includes('@outlook') || user.includes('@hotmail') || user.includes('@live');
+
+  if (isOutlook) {
+    return nodemailer.createTransport({
+      host: 'smtp-mail.outlook.com',
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      family: 4, // Force IPv4 — Railway does not support IPv6
+      auth: {
+        user: env.EMAIL_USER,
+        pass: env.EMAIL_PASS,
+      },
+    });
+  }
+
+  // Default: Gmail
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    family: 4, // Force IPv4 — Railway does not support IPv6
     auth: {
       user: env.EMAIL_USER,
-      pass: env.EMAIL_PASS, // Gmail App Password (not your normal Gmail password)
+      pass: env.EMAIL_PASS,
     },
   });
 };
