@@ -236,7 +236,7 @@ export function PricingPage() {
               },
               {
                 q: 'What types of interviews are available?',
-                a: 'We cover Frontend, Backend, Full Stack, DevOps, and Data Science interviews at beginner, intermediate, and advanced levels.',
+                a: 'We cover Frontend, Backend, Full Stack, DevOps, AI/ML Engineer, Gen AI Engineer, MLOps Engineer, Data Engineer, and Data Scientist interviews at beginner, intermediate, and advanced levels.',
               },
               {
                 q: 'How does the voice-based interview work?',

@@ -93,7 +93,7 @@ export function LandingPage() {
                 step: '1',
                 icon: <Brain className="w-8 h-8 text-blue-600" />,
                 title: 'Choose Your Interview',
-                description: 'Select your tech stack (Frontend, Backend, Full Stack, DevOps) and difficulty level.',
+                description: 'Select your role — Frontend, Backend, Full Stack, DevOps, AI/ML, Gen AI, MLOps, Data Engineer, or Data Scientist — and your difficulty level.',
               },
               {
                 step: '2',
@@ -234,6 +234,11 @@ export function LandingPage() {
                 <li>Backend</li>
                 <li>Full Stack</li>
                 <li>DevOps</li>
+                <li>AI/ML Engineer</li>
+                <li>Gen AI Engineer</li>
+                <li>MLOps Engineer</li>
+                <li>Data Engineer</li>
+                <li>Data Scientist</li>
               </ul>
             </div>
             <div>

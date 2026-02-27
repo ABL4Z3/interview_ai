@@ -80,18 +80,28 @@ export function DashboardPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Interview Type
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {['frontend', 'backend', 'fullstack', 'devops'].map((type) => (
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { value: 'frontend', label: 'Frontend' },
+                      { value: 'backend', label: 'Backend' },
+                      { value: 'fullstack', label: 'Full Stack' },
+                      { value: 'devops', label: 'DevOps' },
+                      { value: 'ai_ml_engineer', label: 'AI/ML Engineer' },
+                      { value: 'gen_ai_engineer', label: 'Gen AI Engineer' },
+                      { value: 'mlops_engineer', label: 'MLOps Engineer' },
+                      { value: 'data_engineer', label: 'Data Engineer' },
+                      { value: 'data_scientist', label: 'Data Scientist' },
+                    ].map(({ value, label }) => (
                       <button
-                        key={type}
-                        onClick={() => setSelectedType(type)}
-                        className={`p-4 rounded-lg border-2 font-semibold capitalize transition ${
-                          selectedType === type
+                        key={value}
+                        onClick={() => setSelectedType(value)}
+                        className={`p-3 rounded-lg border-2 font-semibold transition text-sm ${
+                          selectedType === value
                             ? 'border-blue-600 bg-blue-50 text-blue-600'
                             : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                         }`}
                       >
-                        {type}
+                        {label}
                       </button>
                     ))}
                   </div>
