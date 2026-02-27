@@ -14,7 +14,7 @@ const interviewSchema = new mongoose.Schema(
     description: String,
     interviewType: {
       type: String,
-      enum: ['frontend', 'backend', 'fullstack', 'devops', 'data-science'],
+      enum: ['frontend', 'backend', 'fullstack', 'devops', 'data-science', 'ai_ml_engineer', 'gen_ai_engineer', 'mlops_engineer', 'data_engineer', 'data_scientist'],
       default: 'fullstack',
     },
     difficultyLevel: {
