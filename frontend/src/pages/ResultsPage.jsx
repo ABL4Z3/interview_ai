@@ -80,9 +80,9 @@ export function ResultsPage() {
                   <p className="text-gray-900 font-semibold mb-3">{q.questionText}</p>
 
                   {q.candidateResponse && (
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <p className="text-sm text-gray-600 mb-2">Your Answer:</p>
-                      <p className="text-gray-800">{q.candidateResponse}</p>
+                    <div className="bg-gray-100 rounded-lg p-4 mb-4 border border-gray-200">
+                      <p className="text-sm text-gray-600 mb-2 font-medium">Your Answer:</p>
+                      <p className="text-gray-900">{q.candidateResponse}</p>
                     </div>
                   )}
 
