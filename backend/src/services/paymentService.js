@@ -80,7 +80,12 @@ export const createOrder = async (plan, userId, currency = 'INR') => {
   const validCurrency = currency === 'USD' ? 'USD' : 'INR';
   const price = validCurrency === 'USD' ? planDetails.priceUSD : planDetails.priceINR;
 
+  if (!price || price <= 0) {
+    throw new ApiError(400, `Invalid price for plan '${plan}' with currency '${validCurrency}'`);
+  }
+
   const razorpay = getRazorpay();
+  console.log('[Payment] Creating order:', { plan, currency: validCurrency, amount: Math.round(price * 100) });
 
   const options = {
     amount: Math.round(price * 100), // Razorpay expects smallest unit (paise/cents)

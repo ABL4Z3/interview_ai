@@ -104,13 +104,13 @@ export function PricingPage() {
     setProcessing(planId);
     try {
       const response = await apiClient.post('/payment/create-order', { plan: planId, currency });
-      const { orderId, amount, currency, keyId } = response.data.data;
+      const { orderId, amount, currency: orderCurrency, keyId } = response.data.data;
 
       // Load Razorpay checkout
       const options = {
         key: keyId,
         amount,
-        currency,
+        currency: orderCurrency,
         name: 'IntervuAI',
         description: `${plans.find(p => p.id === planId).name} Plan`,
         order_id: orderId,
@@ -142,7 +142,9 @@ export function PricingPage() {
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to create order');
+      console.error('Create order error:', error?.response?.data || error.message || error);
+      const msg = error.response?.data?.message || error.message || 'Failed to create order. Check console for details.';
+      alert(msg);
     } finally {
       setProcessing(null);
     }
