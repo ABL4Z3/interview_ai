@@ -19,7 +19,7 @@ export const getPlans = asyncHandler(async (req, res) => {
  * @body {plan}
  */
 export const createPaymentOrder = asyncHandler(async (req, res) => {
-  const { plan } = req.body;
+  const { plan, currency } = req.body;
   const userId = req.user.userId;
 
   if (!plan || !PLANS[plan]) {
@@ -31,7 +31,7 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'User not found');
   }
 
-  const order = await createOrder(plan, userId);
+  const order = await createOrder(plan, userId, currency);
 
   // Create pending payment record
   await Payment.create({
@@ -72,8 +72,10 @@ export const verifyPaymentHandler = asyncHandler(async (req, res) => {
   }
 
   // Verify signature
+  console.log('[Payment] Verifying:', { razorpayOrderId, razorpayPaymentId });
   const isValid = verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature);
   if (!isValid) {
+    console.error('[Payment] Signature verification FAILED for order:', razorpayOrderId);
     // Update payment as failed
     await Payment.findOneAndUpdate(
       { razorpayOrderId },

@@ -10,8 +10,8 @@ const plans = [
   {
     id: 'free',
     name: 'Free',
-    price: 0,
-    period: '',
+    priceINR: 0,
+    priceUSD: 0,
     description: 'Try IntervuAI with free credits',
     credits: 3,
     features: [
@@ -28,8 +28,8 @@ const plans = [
   {
     id: 'starter',
     name: 'Starter',
-    price: 499,
-    period: '',
+    priceINR: 499,
+    priceUSD: 5.99,
     description: 'Great for focused preparation',
     credits: 15,
     features: [
@@ -46,8 +46,8 @@ const plans = [
   {
     id: 'growth',
     name: 'Growth',
-    price: 999,
-    period: '',
+    priceINR: 999,
+    priceUSD: 11.99,
     description: 'Best value for serious prep',
     credits: 35,
     features: [
@@ -64,8 +64,8 @@ const plans = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 1999,
-    period: '',
+    priceINR: 1999,
+    priceUSD: 23.99,
     description: 'Maximum preparation power',
     credits: 80,
     features: [
@@ -85,6 +85,10 @@ export function PricingPage() {
   const navigate = useNavigate();
   const { token, currentUser, getMe } = useAuthStore();
   const [processing, setProcessing] = useState(null);
+  const [currency, setCurrency] = useState('INR');
+
+  const getPrice = (plan) => currency === 'USD' ? plan.priceUSD : plan.priceINR;
+  const currencySymbol = currency === 'USD' ? '$' : '₹';
 
   const handleSelectPlan = async (planId) => {
     if (planId === 'free') {
@@ -99,7 +103,7 @@ export function PricingPage() {
 
     setProcessing(planId);
     try {
-      const response = await apiClient.post('/payment/create-order', { plan: planId });
+      const response = await apiClient.post('/payment/create-order', { plan: planId, currency });
       const { orderId, amount, currency, keyId } = response.data.data;
 
       // Load Razorpay checkout
@@ -117,12 +121,13 @@ export function PricingPage() {
               razorpayPaymentId: razorpayResponse.razorpay_payment_id,
               razorpaySignature: razorpayResponse.razorpay_signature,
             });
-            // Refresh user data so dashboard shows updated plan & interviews
             await getMe();
-            alert('Payment successful! Your plan has been upgraded.');
+            alert('Payment successful! Credits added to your account.');
             navigate('/dashboard');
           } catch (err) {
-            alert('Payment verification failed. Please contact support.');
+            console.error('Payment verify error:', err);
+            const msg = err.response?.data?.message || 'Payment verification failed. Please contact support.';
+            alert(msg);
           }
         },
         prefill: {
@@ -186,6 +191,20 @@ export function PricingPage() {
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Choose the plan that fits your interview preparation needs. Start free and upgrade anytime.
             </p>
+
+            {/* Currency Toggle */}
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <span className={`text-sm font-medium ${currency === 'INR' ? 'text-gray-900' : 'text-gray-400'}`}>INR (₹)</span>
+              <button
+                onClick={() => setCurrency(c => c === 'INR' ? 'USD' : 'INR')}
+                className="relative w-14 h-7 rounded-full bg-blue-600 transition-colors focus:outline-none"
+              >
+                <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  currency === 'USD' ? 'translate-x-7' : 'translate-x-0.5'
+                }`} />
+              </button>
+              <span className={`text-sm font-medium ${currency === 'USD' ? 'text-gray-900' : 'text-gray-400'}`}>USD ($)</span>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
@@ -208,12 +227,12 @@ export function PricingPage() {
                   <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
                   <div className="flex items-baseline justify-center">
                     <span className="text-5xl font-extrabold text-gray-900">
-                      {plan.price === 0 ? 'Free' : `₹${plan.price}`}
+                      {getPrice(plan) === 0 ? 'Free' : `${currencySymbol}${getPrice(plan)}`}
                     </span>
                   </div>
                   <p className="text-blue-600 font-semibold mt-2">{plan.credits} credits</p>
-                  {plan.price > 0 && (
-                    <p className="text-xs text-gray-500 mt-1">₹{(plan.price / plan.credits).toFixed(0)}/credit</p>
+                  {getPrice(plan) > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">{currencySymbol}{(getPrice(plan) / plan.credits).toFixed(currency === 'USD' ? 2 : 0)}/credit</p>
                   )}
                 </div>
                 <ul className="space-y-4 mb-8 flex-grow">
@@ -261,7 +280,7 @@ export function PricingPage() {
               },
               {
                 q: 'How do credits work?',
-                a: 'Each interview costs credits based on duration (Quick: 1, Standard: 2, Deep Dive: 3) plus optional analysis upgrades (Detailed: +1, Premium: +2). You choose your combination before each interview.',
+                a: 'Each interview costs credits based on duration (Quick ~8 min: 1 credit, Standard ~15 min: 2 credits, Deep Dive ~25 min: 3 credits) plus optional analysis upgrades (Detailed: +1, Premium: +2). You choose your combination before each interview.',
               },
               {
                 q: 'What types of interviews are available?',
@@ -273,7 +292,7 @@ export function PricingPage() {
               },
               {
                 q: 'What payment methods do you accept?',
-                a: 'We accept all major credit/debit cards, UPI, and Net Banking through Razorpay.',
+                a: 'We accept all major credit/debit cards, UPI, Net Banking (India), and international cards via Razorpay. Toggle between INR and USD pricing on this page.',
               },
             ].map((faq, idx) => (
               <div key={idx} className="border-b border-gray-200 pb-6">

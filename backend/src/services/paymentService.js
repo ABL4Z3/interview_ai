@@ -12,8 +12,8 @@ function getRazorpay() {
       throw new ApiError(503, 'Payment service not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
     }
     razorpayInstance = new Razorpay({
-      key_id: env.RAZORPAY_KEY_ID,
-      key_secret: env.RAZORPAY_KEY_SECRET,
+      key_id: (env.RAZORPAY_KEY_ID || '').trim(),
+      key_secret: (env.RAZORPAY_KEY_SECRET || '').trim(),
     });
   }
   return razorpayInstance;
@@ -23,33 +23,36 @@ function getRazorpay() {
 export const PLANS = {
   starter: {
     name: 'Starter',
-    price: 499, // INR
+    priceINR: 499,
+    priceUSD: 5.99,
     credits: 15,
     duration: 30, // days
-    features: ['15 credits/month', 'All interview types', 'Basic + Detailed feedback'],
+    features: ['15 credits', 'All interview types', 'Basic + Detailed feedback'],
   },
   growth: {
     name: 'Growth',
-    price: 999, // INR
+    priceINR: 999,
+    priceUSD: 11.99,
     credits: 35,
     duration: 30,
-    features: ['35 credits/month', 'All interview types', 'Premium analysis', 'Priority support'],
+    features: ['35 credits', 'All interview types', 'Premium analysis', 'Priority support'],
   },
   pro: {
     name: 'Pro',
-    price: 1999, // INR
+    priceINR: 1999,
+    priceUSD: 23.99,
     credits: 80,
     duration: 30,
-    features: ['80 credits/month', 'All interview types', 'Premium analysis', 'Priority support', 'Detailed roadmaps'],
+    features: ['80 credits', 'All interview types', 'Premium analysis', 'Priority support', 'Detailed roadmaps'],
   },
 };
 
 // Credit cost lookup
 export const CREDIT_COSTS = {
   duration: {
-    quick: 1,    // 5 questions, ~10 min
-    standard: 2, // 8 questions, ~16 min
-    deep: 3,     // 12 questions, ~25 min
+    quick: 1,    // ~8 min interview
+    standard: 2, // ~15 min interview
+    deep: 3,     // ~25 min interview
   },
   analysis: {
     basic: 0,    // score + brief feedback (included)
@@ -68,17 +71,20 @@ export const DURATION_QUESTIONS = {
 /**
  * Create a Razorpay order
  */
-export const createOrder = async (plan, userId) => {
+export const createOrder = async (plan, userId, currency = 'INR') => {
   const planDetails = PLANS[plan];
   if (!planDetails) {
-    throw new ApiError(400, `Invalid plan: ${plan}. Choose 'starter' or 'growth'.`);
+    throw new ApiError(400, `Invalid plan: ${plan}. Choose 'starter', 'growth', or 'pro'.`);
   }
+
+  const validCurrency = currency === 'USD' ? 'USD' : 'INR';
+  const price = validCurrency === 'USD' ? planDetails.priceUSD : planDetails.priceINR;
 
   const razorpay = getRazorpay();
 
   const options = {
-    amount: planDetails.price * 100, // Razorpay expects paise
-    currency: 'INR',
+    amount: Math.round(price * 100), // Razorpay expects smallest unit (paise/cents)
+    currency: validCurrency,
     receipt: `r_${String(userId).slice(-8)}_${Date.now().toString().slice(-10)}`,
     notes: {
       userId,
@@ -106,13 +112,27 @@ export const createOrder = async (plan, userId) => {
  * Verify Razorpay payment signature
  */
 export const verifyPayment = (razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
+  const secret = (env.RAZORPAY_KEY_SECRET || '').trim();
+  if (!secret) {
+    console.error('[Payment] RAZORPAY_KEY_SECRET is not set!');
+    return false;
+  }
+
   const body = razorpayOrderId + '|' + razorpayPaymentId;
   const expectedSignature = crypto
-    .createHmac('sha256', env.RAZORPAY_KEY_SECRET)
+    .createHmac('sha256', secret)
     .update(body)
     .digest('hex');
 
-  return expectedSignature === razorpaySignature;
+  const isValid = expectedSignature === razorpaySignature;
+  if (!isValid) {
+    console.error('[Payment] Signature mismatch:', {
+      orderId: razorpayOrderId,
+      expected: expectedSignature.substring(0, 12) + '...',
+      received: (razorpaySignature || '').substring(0, 12) + '...',
+    });
+  }
+  return isValid;
 };
 
 /**

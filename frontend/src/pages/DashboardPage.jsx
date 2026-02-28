@@ -144,9 +144,9 @@ export function DashboardPage() {
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { value: 'quick', label: 'Quick', desc: '5 questions', cost: 1 },
-                      { value: 'standard', label: 'Standard', desc: '8 questions', cost: 2 },
-                      { value: 'deep', label: 'Deep Dive', desc: '12 questions', cost: 3 },
+                      { value: 'quick', label: 'Quick', desc: '~8 min', cost: 1 },
+                      { value: 'standard', label: 'Standard', desc: '~15 min', cost: 2 },
+                      { value: 'deep', label: 'Deep Dive', desc: '~25 min', cost: 3 },
                     ].map(({ value, label, desc, cost }) => (
                       <button
                         key={value}
