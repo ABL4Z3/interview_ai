@@ -23,6 +23,26 @@ const interviewSchema = new mongoose.Schema(
       default: 'intermediate',
     },
     
+    // Duration tier
+    duration: {
+      type: String,
+      enum: ['quick', 'standard', 'deep'],
+      default: 'standard',
+    },
+    
+    // Analysis tier
+    analysisType: {
+      type: String,
+      enum: ['basic', 'detailed', 'premium'],
+      default: 'basic',
+    },
+    
+    // Credits charged for this interview
+    creditsUsed: {
+      type: Number,
+      default: 0,
+    },
+    
     // Interview status
     status: {
       type: String,

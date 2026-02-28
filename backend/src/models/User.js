@@ -48,9 +48,9 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    interviewsRemaining: {
+    credits: {
       type: Number,
-      default: 3, // Free tier: 3 interviews
+      default: 3, // Free tier: 3 credits
     },
     
     // Payment

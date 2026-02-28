@@ -247,14 +247,14 @@ def get_questions_for_interview(interview_type, difficulty_level):
 
 class InterviewerAgent(Agent):
     def __init__(self, interview_type="fullstack", difficulty_level="intermediate",
-                 interview_id=None, user_name="Candidate"):
+                 interview_id=None, user_name="Candidate", max_questions=8):
         self.interview_type = interview_type
         self.difficulty_level = difficulty_level
         self.interview_id = interview_id
         self.user_name = user_name
         self.conversation_log = []
         self.question_count = 0
-        self.max_questions = 8
+        self.max_questions = max_questions
 
         questions = get_questions_for_interview(interview_type, difficulty_level)
         questions_text = json.dumps(questions, indent=2)
@@ -335,6 +335,7 @@ async def entrypoint(ctx: JobContext):
     difficulty_level = metadata.get("difficultyLevel", "intermediate")
     interview_id = metadata.get("interviewId", None)
     user_name = metadata.get("userName", "Candidate")
+    max_questions = metadata.get("maxQuestions", 8)
 
     print(f"Starting interview: type={interview_type}, level={difficulty_level}, id={interview_id}")
 
@@ -343,6 +344,7 @@ async def entrypoint(ctx: JobContext):
         difficulty_level=difficulty_level,
         interview_id=interview_id,
         user_name=user_name,
+        max_questions=max_questions,
     )
 
     session = AgentSession()

@@ -121,7 +121,7 @@ export const getMe = asyncHandler(async (req, res) => {
       email: user.email,
       subscriptionPlan: user.subscriptionPlan,
       totalInterviews: user.totalInterviews,
-      interviewsRemaining: user.interviewsRemaining,
+      credits: user.credits,
     }, 'User retrieved successfully')
   );
 });
@@ -171,7 +171,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         subscriptionPlan: user.subscriptionPlan,
-        interviewsRemaining: user.interviewsRemaining,
+        credits: user.credits,
       },
     }, 'Google sign-in successful')
   );

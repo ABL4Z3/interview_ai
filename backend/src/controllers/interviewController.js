@@ -13,6 +13,7 @@ import {
   validateAudio,
 } from '../services/deepgramService.js';
 import { generateToken, getLiveKitUrl } from '../services/livekitService.js';
+import { CREDIT_COSTS, DURATION_QUESTIONS } from '../services/paymentService.js';
 
 /**
  * Start a new interview
@@ -21,8 +22,13 @@ import { generateToken, getLiveKitUrl } from '../services/livekitService.js';
  * @body {interviewType, difficultyLevel}
  */
 export const startInterview = asyncHandler(async (req, res) => {
-  const { interviewType = 'fullstack', difficultyLevel = 'intermediate' } = req.body;
+  const { interviewType = 'fullstack', difficultyLevel = 'intermediate', duration = 'standard', analysisType = 'basic' } = req.body;
   const userId = req.user.userId;
+
+  // Calculate credit cost
+  const durationCost = CREDIT_COSTS.duration[duration] || 2;
+  const analysisCost = CREDIT_COSTS.analysis[analysisType] || 0;
+  const totalCredits = durationCost + analysisCost;
 
   // Validate user exists
   const user = await User.findById(userId);
@@ -30,14 +36,9 @@ export const startInterview = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'User not found');
   }
 
-  // Check if user can start interview (free tier: 3 interviews)
-  if (user.subscriptionPlan === 'free' && user.totalInterviews >= 3) {
-    throw new ApiError(403, 'Free tier limited to 3 interviews. Upgrade to start another.');
-  }
-
-  // Check interviews remaining for paid plans
-  if (user.interviewsRemaining <= 0 && user.subscriptionPlan !== 'growth') {
-    throw new ApiError(403, 'No interviews remaining in your plan');
+  // Check credits
+  if ((user.credits || 0) < totalCredits) {
+    throw new ApiError(403, `Not enough credits. This interview costs ${totalCredits} credits. You have ${user.credits || 0}.`);
   }
 
   // Create interview document
@@ -45,6 +46,9 @@ export const startInterview = asyncHandler(async (req, res) => {
     userId,
     interviewType,
     difficultyLevel,
+    duration,
+    analysisType,
+    creditsUsed: totalCredits,
     status: 'in_progress',
     startedAt: new Date(),
   });
@@ -70,9 +74,7 @@ export const startInterview = asyncHandler(async (req, res) => {
 
   // Update user interview count
   user.totalInterviews += 1;
-  if (user.interviewsRemaining > 0) {
-    user.interviewsRemaining -= 1;
-  }
+  user.credits = (user.credits || 0) - totalCredits;
   await user.save();
 
   res.status(201).json(
@@ -83,6 +85,7 @@ export const startInterview = asyncHandler(async (req, res) => {
         questionNumber: 1,
         question: firstQuestion,
         status: interview.status,
+        creditsUsed: totalCredits,
       },
       'Interview started successfully'
     )
@@ -303,37 +306,43 @@ export default {
  * @body {interviewType, difficultyLevel}
  */
 export const startLiveInterview = asyncHandler(async (req, res) => {
-  const { interviewType = 'fullstack', difficultyLevel = 'intermediate' } = req.body;
+  const { interviewType = 'fullstack', difficultyLevel = 'intermediate', duration = 'standard', analysisType = 'basic' } = req.body;
   const userId = req.user.userId;
+
+  // Calculate credit cost
+  const durationCost = CREDIT_COSTS.duration[duration] || 2;
+  const analysisCost = CREDIT_COSTS.analysis[analysisType] || 0;
+  const totalCredits = durationCost + analysisCost;
 
   const user = await User.findById(userId);
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
 
-  // Check quota
-  if (user.subscriptionPlan === 'free' && user.totalInterviews >= 3) {
-    throw new ApiError(403, 'Free tier limited to 3 interviews. Upgrade to start another.');
+  // Check credits
+  if ((user.credits || 0) < totalCredits) {
+    throw new ApiError(403, `Not enough credits. This interview costs ${totalCredits} credits. You have ${user.credits || 0}.`);
   }
-  if (user.interviewsRemaining <= 0 && user.subscriptionPlan !== 'growth') {
-    throw new ApiError(403, 'No interviews remaining in your plan');
-  }
+
+  // Determine max questions from duration
+  const maxQuestions = DURATION_QUESTIONS[duration] || 8;
 
   // Create interview record
   const interview = await Interview.create({
     userId,
     interviewType,
     difficultyLevel,
+    duration,
+    analysisType,
+    creditsUsed: totalCredits,
     status: 'in_progress',
     startedAt: new Date(),
     isLiveInterview: true,
   });
 
-  // Update user count
+  // Deduct credits
   user.totalInterviews += 1;
-  if (user.interviewsRemaining > 0) {
-    user.interviewsRemaining -= 1;
-  }
+  user.credits = (user.credits || 0) - totalCredits;
   await user.save();
 
   // Generate LiveKit room and token
@@ -342,6 +351,7 @@ export const startLiveInterview = asyncHandler(async (req, res) => {
     interviewId: interview._id.toString(),
     interviewType,
     difficultyLevel,
+    maxQuestions,
     userName: user.name,
     userId: userId,
   };

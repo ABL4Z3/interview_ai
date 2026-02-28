@@ -12,12 +12,14 @@ const plans = [
     name: 'Free',
     price: 0,
     period: '',
-    description: 'Try IntervuAI with a free interview',
+    description: 'Try IntervuAI with free credits',
+    credits: 3,
     features: [
-      { text: '3 AI interviews', included: true },
-      { text: 'Basic feedback', included: true },
-      { text: 'Score tracking', included: true },
+      { text: '3 credits included', included: true },
+      { text: 'All 9 interview types', included: true },
+      { text: 'Basic feedback & scoring', included: true },
       { text: 'Detailed analysis', included: false },
+      { text: 'Deep dive interviews', included: false },
       { text: 'Priority support', included: false },
     ],
     cta: 'Get Started Free',
@@ -26,34 +28,56 @@ const plans = [
   {
     id: 'starter',
     name: 'Starter',
-    price: 1,
-    period: '/month',
-    description: 'For serious interview preparation',
+    price: 499,
+    period: '',
+    description: 'Great for focused preparation',
+    credits: 15,
     features: [
-      { text: '5 AI interviews/month', included: true },
-      { text: 'Detailed feedback', included: true },
-      { text: 'Score tracking', included: true },
-      { text: 'Detailed analysis', included: true },
+      { text: '15 credits', included: true },
+      { text: 'All 9 interview types', included: true },
+      { text: 'Standard & Quick interviews', included: true },
+      { text: 'Detailed analysis available', included: true },
+      { text: 'Deep dive interviews', included: false },
       { text: 'Priority support', included: false },
     ],
-    cta: 'Start Preparing',
+    cta: 'Buy 15 Credits',
     popular: false,
   },
   {
     id: 'growth',
     name: 'Growth',
-    price: 2,
-    period: '/month',
-    description: 'Unlimited practice for job seekers',
+    price: 999,
+    period: '',
+    description: 'Best value for serious prep',
+    credits: 35,
     features: [
-      { text: 'Unlimited AI interviews', included: true },
-      { text: 'Detailed feedback', included: true },
-      { text: 'Score tracking', included: true },
-      { text: 'Detailed analysis', included: true },
+      { text: '35 credits', included: true },
+      { text: 'All 9 interview types', included: true },
+      { text: 'All interview durations', included: true },
+      { text: 'All analysis tiers', included: true },
+      { text: 'Deep dive interviews', included: true },
+      { text: 'Priority support', included: false },
+    ],
+    cta: 'Buy 35 Credits',
+    popular: true,
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 1999,
+    period: '',
+    description: 'Maximum preparation power',
+    credits: 80,
+    features: [
+      { text: '80 credits', included: true },
+      { text: 'All 9 interview types', included: true },
+      { text: 'All interview durations', included: true },
+      { text: 'All analysis tiers', included: true },
+      { text: 'Deep dive interviews', included: true },
       { text: 'Priority support', included: true },
     ],
-    cta: 'Go Unlimited',
-    popular: true,
+    cta: 'Buy 80 Credits',
+    popular: false,
   },
 ];
 
@@ -164,7 +188,7 @@ export function PricingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {plans.map((plan) => (
               <Card
                 key={plan.id}
@@ -175,7 +199,7 @@ export function PricingPage() {
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className="bg-blue-600 text-white text-sm font-bold px-4 py-1 rounded-full">
-                      Most Popular
+                      Best Value
                     </span>
                   </div>
                 )}
@@ -186,10 +210,11 @@ export function PricingPage() {
                     <span className="text-5xl font-extrabold text-gray-900">
                       {plan.price === 0 ? 'Free' : `₹${plan.price}`}
                     </span>
-                    {plan.period && (
-                      <span className="text-gray-500 ml-1">{plan.period}</span>
-                    )}
                   </div>
+                  <p className="text-blue-600 font-semibold mt-2">{plan.credits} credits</p>
+                  {plan.price > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">₹{(plan.price / plan.credits).toFixed(0)}/credit</p>
+                  )}
                 </div>
                 <ul className="space-y-4 mb-8 flex-grow">
                   {plan.features.map((feature, idx) => (
@@ -232,19 +257,19 @@ export function PricingPage() {
             {[
               {
                 q: 'Can I try IntervuAI for free?',
-                a: 'Yes! Every new account gets 3 free AI interviews with full feedback and scoring.',
+                a: 'Yes! Every new account gets 3 free credits. A standard interview costs 2 credits, so you can try at least one full interview for free.',
+              },
+              {
+                q: 'How do credits work?',
+                a: 'Each interview costs credits based on duration (Quick: 1, Standard: 2, Deep Dive: 3) plus optional analysis upgrades (Detailed: +1, Premium: +2). You choose your combination before each interview.',
               },
               {
                 q: 'What types of interviews are available?',
                 a: 'We cover Frontend, Backend, Full Stack, DevOps, AI/ML Engineer, Gen AI Engineer, MLOps Engineer, Data Engineer, and Data Scientist interviews at beginner, intermediate, and advanced levels.',
               },
               {
-                q: 'How does the voice-based interview work?',
-                a: 'Our AI asks you a question, you record your spoken answer using your microphone, and the AI transcribes, evaluates, and scores your response in real-time.',
-              },
-              {
-                q: 'Can I cancel my subscription?',
-                a: 'Yes, you can cancel anytime. Your access continues until the end of your billing period.',
+                q: 'Do credits expire?',
+                a: 'No! Your credits never expire. Buy them once and use them whenever you\'re ready to practice.',
               },
               {
                 q: 'What payment methods do you accept?',

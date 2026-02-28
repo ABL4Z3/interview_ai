@@ -23,7 +23,7 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
   const userId = req.user.userId;
 
   if (!plan || !PLANS[plan]) {
-    throw new ApiError(400, "Invalid plan. Choose 'starter' or 'growth'.");
+    throw new ApiError(400, "Invalid plan. Choose 'starter', 'growth', or 'pro'.");
   }
 
   const user = await User.findById(userId);
@@ -108,7 +108,7 @@ export const verifyPaymentHandler = asyncHandler(async (req, res) => {
   user.subscriptionPlan = payment.subscriptionPlan;
   user.subscriptionActive = true;
   user.subscriptionEndDate = new Date(Date.now() + planDetails.duration * 24 * 60 * 60 * 1000);
-  user.interviewsRemaining = (user.interviewsRemaining || 0) + planDetails.interviews;
+  user.credits = (user.credits || 0) + planDetails.credits;
   await user.save();
 
   res.json(
@@ -121,7 +121,7 @@ export const verifyPaymentHandler = asyncHandler(async (req, res) => {
       },
       user: {
         subscriptionPlan: user.subscriptionPlan,
-        interviewsRemaining: user.interviewsRemaining,
+        credits: user.credits,
         subscriptionEndDate: user.subscriptionEndDate,
       },
     }, 'Payment verified and subscription activated')

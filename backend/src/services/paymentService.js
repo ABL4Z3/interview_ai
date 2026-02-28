@@ -23,18 +23,46 @@ function getRazorpay() {
 export const PLANS = {
   starter: {
     name: 'Starter',
-    price: 1, // INR (TEST)
-    interviews: 5,
+    price: 499, // INR
+    credits: 15,
     duration: 30, // days
-    features: ['5 AI interviews/month', 'Detailed feedback', 'Score tracking'],
+    features: ['15 credits/month', 'All interview types', 'Basic + Detailed feedback'],
   },
   growth: {
     name: 'Growth',
-    price: 2, // INR (TEST)
-    interviews: 999, // unlimited
+    price: 999, // INR
+    credits: 35,
     duration: 30,
-    features: ['Unlimited AI interviews', 'Detailed feedback', 'Score tracking', 'Priority support', 'Interview history'],
+    features: ['35 credits/month', 'All interview types', 'Premium analysis', 'Priority support'],
   },
+  pro: {
+    name: 'Pro',
+    price: 1999, // INR
+    credits: 80,
+    duration: 30,
+    features: ['80 credits/month', 'All interview types', 'Premium analysis', 'Priority support', 'Detailed roadmaps'],
+  },
+};
+
+// Credit cost lookup
+export const CREDIT_COSTS = {
+  duration: {
+    quick: 1,    // 5 questions, ~10 min
+    standard: 2, // 8 questions, ~16 min
+    deep: 3,     // 12 questions, ~25 min
+  },
+  analysis: {
+    basic: 0,    // score + brief feedback (included)
+    detailed: 1, // per-question feedback + tips
+    premium: 2,  // detailed + improvement roadmap + model answers
+  },
+};
+
+// Map duration tier to number of questions for the agent
+export const DURATION_QUESTIONS = {
+  quick: 5,
+  standard: 8,
+  deep: 12,
 };
 
 /**
@@ -55,7 +83,7 @@ export const createOrder = async (plan, userId) => {
     notes: {
       userId,
       plan,
-      interviews: planDetails.interviews,
+      credits: planDetails.credits,
     },
   };
 
@@ -99,4 +127,6 @@ export default {
   verifyPayment,
   getPlanDetails,
   PLANS,
+  CREDIT_COSTS,
+  DURATION_QUESTIONS,
 };

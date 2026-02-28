@@ -7,12 +7,14 @@ export const useInterviewStore = create((set) => ({
   loading: false,
   error: null,
 
-  startInterview: async (type, level) => {
+  startInterview: async (type, level, duration = 'standard', analysisType = 'basic') => {
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post('/interview/start', {
         interviewType: type,
         difficultyLevel: level,
+        duration,
+        analysisType,
       });
       set({ currentInterview: response.data.data, loading: false });
       return response.data.data;
@@ -23,12 +25,14 @@ export const useInterviewStore = create((set) => ({
     }
   },
 
-  startLiveInterview: async (type, level) => {
+  startLiveInterview: async (type, level, duration = 'standard', analysisType = 'basic') => {
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post('/interview/start-live', {
         interviewType: type,
         difficultyLevel: level,
+        duration,
+        analysisType,
       });
       set({ currentInterview: response.data.data, loading: false });
       return response.data.data;
