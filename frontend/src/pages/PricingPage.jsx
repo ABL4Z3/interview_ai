@@ -196,16 +196,20 @@ export function PricingPage() {
 
             {/* Currency Toggle */}
             <div className="flex items-center justify-center gap-3 mt-6">
-              <span className={`text-sm font-medium ${currency === 'INR' ? 'text-gray-900' : 'text-gray-400'}`}>INR (₹)</span>
+              <span className={`text-sm font-medium transition-colors ${currency === 'INR' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>₹ INR</span>
               <button
                 onClick={() => setCurrency(c => c === 'INR' ? 'USD' : 'INR')}
-                className="relative w-14 h-7 rounded-full bg-blue-600 transition-colors focus:outline-none"
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  currency === 'USD' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+                role="switch"
+                aria-checked={currency === 'USD'}
               >
-                <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
-                  currency === 'USD' ? 'translate-x-7' : 'translate-x-0.5'
+                <span className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                  currency === 'USD' ? 'translate-x-6' : 'translate-x-1'
                 }`} />
               </button>
-              <span className={`text-sm font-medium ${currency === 'USD' ? 'text-gray-900' : 'text-gray-400'}`}>USD ($)</span>
+              <span className={`text-sm font-medium transition-colors ${currency === 'USD' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>$ USD</span>
             </div>
           </div>
 

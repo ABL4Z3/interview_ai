@@ -306,7 +306,7 @@ export default {
  * @body {interviewType, difficultyLevel}
  */
 export const startLiveInterview = asyncHandler(async (req, res) => {
-  const { interviewType = 'fullstack', difficultyLevel = 'intermediate', duration = 'standard', analysisType = 'basic' } = req.body;
+  const { interviewType = 'fullstack', difficultyLevel = 'intermediate', duration = 'standard', analysisType = 'basic', resumeText = '', jobDescription = '' } = req.body;
   const userId = req.user.userId;
 
   // Calculate credit cost
@@ -355,6 +355,10 @@ export const startLiveInterview = asyncHandler(async (req, res) => {
     userName: user.name,
     userId: userId,
   };
+
+  // Add optional resume/JD to metadata (truncate to prevent oversized tokens)
+  if (resumeText) roomMetadata.resumeText = resumeText.slice(0, 5000);
+  if (jobDescription) roomMetadata.jobDescription = jobDescription.slice(0, 5000);
 
   const token = await generateToken(
     roomName,

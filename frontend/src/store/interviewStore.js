@@ -25,15 +25,19 @@ export const useInterviewStore = create((set) => ({
     }
   },
 
-  startLiveInterview: async (type, level, duration = 'standard', analysisType = 'basic') => {
+  startLiveInterview: async (type, level, duration = 'standard', analysisType = 'basic', resumeText = '', jobDescription = '') => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.post('/interview/start-live', {
+      const body = {
         interviewType: type,
         difficultyLevel: level,
         duration,
         analysisType,
-      });
+      };
+      if (resumeText) body.resumeText = resumeText;
+      if (jobDescription) body.jobDescription = jobDescription;
+
+      const response = await apiClient.post('/interview/start-live', body);
       set({ currentInterview: response.data.data, loading: false });
       return response.data.data;
     } catch (error) {

@@ -17,6 +17,10 @@ export function DashboardPage() {
   const [selectedDuration, setSelectedDuration] = useState('standard');
   const [selectedAnalysis, setSelectedAnalysis] = useState('basic');
   const [isStarting, setIsStarting] = useState(false);
+  const [resumeText, setResumeText] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
+  const [showResume, setShowResume] = useState(false);
+  const [showJD, setShowJD] = useState(false);
 
   const DURATION_CREDITS = { quick: 1, standard: 2, deep: 3 };
   const ANALYSIS_CREDITS = { basic: 0, detailed: 1, premium: 2 };
@@ -41,7 +45,8 @@ export function DashboardPage() {
     setIsStarting(true);
     try {
       const response = await useInterviewStore.getState().startLiveInterview(
-        selectedType, selectedLevel, selectedDuration, selectedAnalysis
+        selectedType, selectedLevel, selectedDuration, selectedAnalysis,
+        resumeText.trim(), jobDescription.trim()
       );
       navigate(`/live-interview/${response.interviewId}`, {
         state: {
@@ -191,6 +196,78 @@ export function DashboardPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Resume Upload (Optional) */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowResume(!showResume)}
+                    className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform ${showResume ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    Resume / CV (Optional)
+                    {resumeText && <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 px-2 py-0.5 rounded-full">Added</span>}
+                  </button>
+                  {showResume && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Paste your resume text below. The AI will tailor questions to your experience.
+                      </p>
+                      <textarea
+                        value={resumeText}
+                        onChange={(e) => setResumeText(e.target.value)}
+                        placeholder="Paste your resume content here..."
+                        rows={5}
+                        maxLength={5000}
+                        className="w-full rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-3 text-sm focus:border-blue-500 focus:outline-none resize-y placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                      />
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-400 dark:text-gray-500">{resumeText.length}/5000 characters</span>
+                        {resumeText && (
+                          <button onClick={() => setResumeText('')} className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">Clear</button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Job Description (Optional) */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowJD(!showJD)}
+                    className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform ${showJD ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    Target Job Description (Optional)
+                    {jobDescription && <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 px-2 py-0.5 rounded-full">Added</span>}
+                  </button>
+                  {showJD && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Paste a job description to focus the interview on relevant skills and requirements.
+                      </p>
+                      <textarea
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        placeholder="Paste the job description here..."
+                        rows={5}
+                        maxLength={5000}
+                        className="w-full rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-3 text-sm focus:border-blue-500 focus:outline-none resize-y placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                      />
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-400 dark:text-gray-500">{jobDescription.length}/5000 characters</span>
+                        {jobDescription && (
+                          <button onClick={() => setJobDescription('')} className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">Clear</button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Credit Cost Summary */}

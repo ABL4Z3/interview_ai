@@ -247,7 +247,8 @@ def get_questions_for_interview(interview_type, difficulty_level):
 
 class InterviewerAgent(Agent):
     def __init__(self, interview_type="fullstack", difficulty_level="intermediate",
-                 interview_id=None, user_name="Candidate", max_questions=8):
+                 interview_id=None, user_name="Candidate", max_questions=8,
+                 resume_text="", job_description=""):
         self.interview_type = interview_type
         self.difficulty_level = difficulty_level
         self.interview_id = interview_id
@@ -264,6 +265,49 @@ class InterviewerAgent(Agent):
         tts = deepgram.TTS()
         vad = silero.VAD.load()
 
+        # Build context sections for resume and job description
+        resume_section = ""
+        if resume_text:
+            resume_section = f"""
+
+CANDIDATE'S RESUME:
+{resume_text}
+
+RESUME-AWARE INSTRUCTIONS:
+- You have the candidate's resume above. Use it to personalize the interview significantly.
+- Reference specific projects, companies, skills, and experiences from their resume.
+- Ask targeted questions about technologies they have listed (e.g., "I see you worked with Kubernetes at Company X — tell me about that").
+- Probe gaps or interesting transitions in their career timeline.
+- Validate claims by asking for concrete examples and depth on listed skills.
+- Compare their stated experience level with their resume to calibrate question difficulty.
+- Do NOT read the resume back to them verbatim — use it as context to drive natural, personalized questions."""
+
+        jd_section = ""
+        if job_description:
+            jd_section = f"""
+
+TARGET JOB DESCRIPTION:
+{job_description}
+
+JOB-FOCUSED INSTRUCTIONS:
+- The candidate is preparing for the role described above. Tailor your questions to match the job requirements.
+- Prioritize topics and technologies mentioned in the job description.
+- Ask scenario-based questions relevant to the role's day-to-day responsibilities.
+- If the JD mentions specific tools, frameworks, or methodologies, include questions about them.
+- Assess the candidate's fit for the role by probing relevant soft skills (teamwork, leadership, communication) mentioned in the JD.
+- Frame questions in the context of the role (e.g., "In this role you'd be leading a team of 5 — how would you handle...")."""
+
+        combined_context = ""
+        if resume_text and job_description:
+            combined_context = """
+
+RESUME + JOB DESCRIPTION CROSS-ANALYSIS:
+- You have BOTH the candidate's resume and the target job description. This is a powerful combination.
+- Identify skill gaps: Where the JD requires skills not evident in the resume, ask questions to discover hidden competencies.
+- Identify strengths: Where the resume strongly matches JD requirements, ask deeper questions to confirm expertise depth.
+- Assess transferability: For experiences not directly matching the JD, explore how those skills translate to the target role.
+- Focus 60% of questions on JD-relevant topics, 30% on resume-specific deep-dives, and 10% on general behavioral questions."""
+
         instructions = f"""You are a conversational and adaptive AI technical interviewer for IntervuAI, acting like a real human engineering manager. Your goal is to conduct a natural, engaging interview that responds dynamically to the candidate's actual experience.
 
 INTERVIEW DETAILS:
@@ -273,7 +317,7 @@ INTERVIEW DETAILS:
 
 TECHNICAL QUESTION BANK (Use as a conceptual guide, not a strict script):
 {questions_text}
-
+{resume_section}{jd_section}{combined_context}
 INTERVIEW FLOW & RULES:
 1. The Introduction: Start warmly. Introduce yourself and ask {user_name} to introduce themselves, including their recent experience and a project they enjoyed working on.
 2. Experience Deep-Dive: Listen closely to their introduction. Your next 1-2 questions MUST be directly based on the specific projects, roles, or technologies they just mentioned. Ask about their specific contributions or challenges faced.
@@ -336,8 +380,10 @@ async def entrypoint(ctx: JobContext):
     interview_id = metadata.get("interviewId", None)
     user_name = metadata.get("userName", "Candidate")
     max_questions = metadata.get("maxQuestions", 8)
+    resume_text = metadata.get("resumeText", "")
+    job_description = metadata.get("jobDescription", "")
 
-    print(f"Starting interview: type={interview_type}, level={difficulty_level}, id={interview_id}")
+    print(f"Starting interview: type={interview_type}, level={difficulty_level}, id={interview_id}, resume={'yes' if resume_text else 'no'}, jd={'yes' if job_description else 'no'}")
 
     agent = InterviewerAgent(
         interview_type=interview_type,
@@ -345,6 +391,8 @@ async def entrypoint(ctx: JobContext):
         interview_id=interview_id,
         user_name=user_name,
         max_questions=max_questions,
+        resume_text=resume_text,
+        job_description=job_description,
     )
 
     session = AgentSession()
