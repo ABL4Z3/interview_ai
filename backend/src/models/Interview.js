@@ -61,8 +61,15 @@ const interviewSchema = new mongoose.Schema(
         candidateResponse: String,
         responseReceivedAt: Date,
         aiEvaluation: {
-          score: Number, // 0-100
+          score: Number, // 0-100 weighted average
+          technicalAccuracy: Number, // 0-100
+          communicationClarity: Number, // 0-100
+          problemSolving: Number, // 0-100
+          depthOfKnowledge: Number, // 0-100
+          practicalExperience: Number, // 0-100
           feedback: String,
+          improvementTip: String,
+          estimatedLevel: String,
           followUpQuestion: String,
         },
       },

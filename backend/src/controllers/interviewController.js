@@ -186,6 +186,7 @@ export const processAudio = asyncHandler(async (req, res) => {
         interviewType: interview.interviewType,
         difficultyLevel: interview.difficultyLevel,
         questionNumber: lastQuestion.questionNumber,
+        analysisType: interview.analysisType || 'basic',
       }
     );
   } catch (error) {
@@ -195,7 +196,14 @@ export const processAudio = asyncHandler(async (req, res) => {
   // Store evaluation
   lastQuestion.aiEvaluation = {
     score: evaluation.score,
+    technicalAccuracy: evaluation.technicalAccuracy,
+    communicationClarity: evaluation.communicationClarity,
+    problemSolving: evaluation.problemSolving,
+    depthOfKnowledge: evaluation.depthOfKnowledge,
+    practicalExperience: evaluation.practicalExperience,
     feedback: evaluation.feedback,
+    improvementTip: evaluation.improvementTip || '',
+    estimatedLevel: evaluation.estimatedLevel || '',
     followUpQuestion: evaluation.followUpQuestion,
   };
   interview.questionsAnswered += 1;
@@ -457,11 +465,19 @@ export const saveLiveResults = asyncHandler(async (req, res) => {
             interviewType: interview.interviewType,
             difficultyLevel: interview.difficultyLevel,
             questionNumber: q.questionNumber,
+            analysisType: interview.analysisType || 'basic',
           }
         );
         q.aiEvaluation = {
           score: evaluation.score,
+          technicalAccuracy: evaluation.technicalAccuracy,
+          communicationClarity: evaluation.communicationClarity,
+          problemSolving: evaluation.problemSolving,
+          depthOfKnowledge: evaluation.depthOfKnowledge,
+          practicalExperience: evaluation.practicalExperience,
           feedback: evaluation.feedback,
+          improvementTip: evaluation.improvementTip || '',
+          estimatedLevel: evaluation.estimatedLevel || '',
           followUpQuestion: evaluation.followUpQuestion || '',
         };
       } catch (error) {
@@ -503,6 +519,7 @@ export const saveLiveResults = asyncHandler(async (req, res) => {
     interview.summary = await generateInterviewSummary(questionsData, {
       interviewType: interview.interviewType,
       difficultyLevel: interview.difficultyLevel,
+      analysisType: interview.analysisType || 'basic',
     });
   } catch (err) {
     interview.summary = `Live interview completed. Overall score: ${interview.overallScore}%.`;
@@ -588,11 +605,19 @@ export const completeLiveInterview = asyncHandler(async (req, res) => {
               interviewType: interview.interviewType,
               difficultyLevel: interview.difficultyLevel,
               questionNumber: q.questionNumber,
+              analysisType: interview.analysisType || 'basic',
             }
           );
           q.aiEvaluation = {
             score: evaluation.score,
+            technicalAccuracy: evaluation.technicalAccuracy,
+            communicationClarity: evaluation.communicationClarity,
+            problemSolving: evaluation.problemSolving,
+            depthOfKnowledge: evaluation.depthOfKnowledge,
+            practicalExperience: evaluation.practicalExperience,
             feedback: evaluation.feedback,
+            improvementTip: evaluation.improvementTip || '',
+            estimatedLevel: evaluation.estimatedLevel || '',
             followUpQuestion: evaluation.followUpQuestion || '',
           };
         } catch (error) {
@@ -632,6 +657,7 @@ export const completeLiveInterview = asyncHandler(async (req, res) => {
         interview.summary = await generateInterviewSummary(questionsData, {
           interviewType: interview.interviewType,
           difficultyLevel: interview.difficultyLevel,
+          analysisType: interview.analysisType || 'basic',
         });
       }
     } catch (err) {

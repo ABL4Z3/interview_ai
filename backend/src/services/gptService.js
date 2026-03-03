@@ -215,8 +215,13 @@ function getMockEvaluation(question, response) {
  * @returns {Promise<{score: number, feedback: string, followUpQuestion: string}>}
  */
 export const evaluateResponse = async (question, response, context = {}) => {
+  const analysisType = context.analysisType || 'basic';
+
   try {
-    const prompt = `You are a professional technical interviewer evaluating a candidate's response.
+    let prompt;
+
+    if (analysisType === 'premium') {
+      prompt = `You are an elite technical interviewer and career coach conducting a premium-tier evaluation.
 
 Question Asked: "${question}"
 
@@ -227,17 +232,99 @@ Interview Context:
 - Difficulty Level: ${context.difficultyLevel || 'intermediate'}
 - Question Number: ${context.questionNumber || 1}
 
-Please evaluate the response and:
-1. Score it from 0-100
-2. Provide 2-3 sentence feedback (be constructive)
-3. Generate an appropriate follow-up question that probes deeper
+Provide an EXPERT-LEVEL evaluation with multi-dimensional scoring. Evaluate across 5 dimensions:
+1. Technical Accuracy (0-100): Is their answer technically correct? Do they demonstrate real understanding?
+2. Communication Clarity (0-100): Did they explain their thought process clearly? Could a team understand them?
+3. Problem Solving (0-100): Do they show structured thinking? Do they consider trade-offs and alternatives?
+4. Depth of Knowledge (0-100): Do they go beyond surface-level? Do they understand the "why" behind concepts?
+5. Practical Experience (0-100): Do they sound like they've done this in real life, or is it purely theoretical?
 
-IMPORTANT: Return ONLY valid JSON with this exact structure, no markdown or extra text:
+Also provide:
+- Detailed feedback (5-7 sentences: what they did well, what was incorrect or missing, what an ideal answer would include)
+- A specific improvement tip they can act on immediately
+- Estimated experience level based on this answer (junior/mid/senior)
+- A follow-up question that probes their weakest dimension
+
+IMPORTANT: Return ONLY valid JSON with this exact structure, no markdown:
 {
-  "score": <number 0-100>,
-  "feedback": "<constructive feedback>",
+  "score": <weighted average 0-100>,
+  "technicalAccuracy": <0-100>,
+  "communicationClarity": <0-100>,
+  "problemSolving": <0-100>,
+  "depthOfKnowledge": <0-100>,
+  "practicalExperience": <0-100>,
+  "feedback": "<detailed 5-7 sentence feedback>",
+  "improvementTip": "<one specific actionable tip>",
+  "estimatedLevel": "<junior|mid|senior>",
+  "followUpQuestion": "<probing follow-up>"
+}`;
+    } else if (analysisType === 'detailed') {
+      prompt = `You are a senior technical interviewer providing detailed evaluation.
+
+Question Asked: "${question}"
+
+Candidate's Response: "${response}"
+
+Interview Context:
+- Interview Type: ${context.interviewType || 'general'}
+- Difficulty Level: ${context.difficultyLevel || 'intermediate'}
+- Question Number: ${context.questionNumber || 1}
+
+Evaluate across 5 dimensions:
+1. Technical Accuracy (0-100): Correctness of the answer
+2. Communication Clarity (0-100): How clearly they explained concepts
+3. Problem Solving (0-100): Structured thinking and trade-off awareness
+4. Depth of Knowledge (0-100): Beyond surface-level understanding
+5. Practical Experience (0-100): Real-world application evidence
+
+Also provide:
+- Detailed feedback (3-4 sentences: strengths, weaknesses, and what to improve)
+- A follow-up question
+
+IMPORTANT: Return ONLY valid JSON, no markdown:
+{
+  "score": <weighted average 0-100>,
+  "technicalAccuracy": <0-100>,
+  "communicationClarity": <0-100>,
+  "problemSolving": <0-100>,
+  "depthOfKnowledge": <0-100>,
+  "practicalExperience": <0-100>,
+  "feedback": "<3-4 sentence detailed feedback>",
   "followUpQuestion": "<next question>"
 }`;
+    } else {
+      // Basic tier — still has category scores for consistent schema
+      prompt = `You are a professional technical interviewer evaluating a candidate's response.
+
+Question Asked: "${question}"
+
+Candidate's Response: "${response}"
+
+Interview Context:
+- Interview Type: ${context.interviewType || 'general'}
+- Difficulty Level: ${context.difficultyLevel || 'intermediate'}
+- Question Number: ${context.questionNumber || 1}
+
+Evaluate the response:
+1. Overall score (0-100)
+2. Rate each dimension (0-100): Technical Accuracy, Communication Clarity, Problem Solving, Depth of Knowledge, Practical Experience
+3. Brief feedback (2-3 sentences)
+4. A follow-up question
+
+IMPORTANT: Return ONLY valid JSON, no markdown:
+{
+  "score": <0-100>,
+  "technicalAccuracy": <0-100>,
+  "communicationClarity": <0-100>,
+  "problemSolving": <0-100>,
+  "depthOfKnowledge": <0-100>,
+  "practicalExperience": <0-100>,
+  "feedback": "<2-3 sentence feedback>",
+  "followUpQuestion": "<follow-up question>"
+}`;
+    }
+
+    const maxTokens = analysisType === 'premium' ? 600 : analysisType === 'detailed' ? 450 : 300;
 
     const messages = [
       {
@@ -250,14 +337,13 @@ IMPORTANT: Return ONLY valid JSON with this exact structure, no markdown or extr
       },
     ];
 
-    console.log('🧠 Calling Cerebras API for response evaluation...');
-    const responseText = await callCerebras(messages, 300);
+    console.log(`🧠 Calling Cerebras API for ${analysisType} evaluation...`);
+    const responseText = await callCerebras(messages, maxTokens);
     const jsonResponse = JSON.parse(responseText);
-    console.log('✅ Response evaluated by Cerebras');
+    console.log(`✅ Response evaluated (${analysisType} tier)`);
     return jsonResponse;
   } catch (error) {
     console.error('Response Evaluation Error:', error.message);
-    // Fallback to mock evaluation
     console.log('⚠️ Falling back to mock evaluation');
     return getMockEvaluation(question, response);
   }
@@ -270,6 +356,8 @@ IMPORTANT: Return ONLY valid JSON with this exact structure, no markdown or extr
  * @returns {Promise<string>} - Interview summary and overall feedback
  */
 export const generateInterviewSummary = async (questionsData, context = {}) => {
+  const analysisType = context.analysisType || 'basic';
+
   try {
     const questionsText = questionsData
       .map((q, i) => `Q${i + 1}: ${q.question}\nResponse: ${q.response}\nScore: ${q.score}`)
@@ -279,7 +367,55 @@ export const generateInterviewSummary = async (questionsData, context = {}) => {
       questionsData.reduce((sum, q) => sum + q.score, 0) / questionsData.length
     );
 
-    const prompt = `You are a professional technical interviewer. Generate a concise interview summary.
+    let prompt;
+
+    if (analysisType === 'premium') {
+      prompt = `You are a senior engineering hiring manager providing a premium-tier interview debrief.
+
+Interview Details:
+- Type: ${context.interviewType}
+- Difficulty: ${context.difficultyLevel}
+- Overall Score: ${avgScore}/100
+
+Questions and Responses:
+${questionsText}
+
+Provide a comprehensive, actionable interview report:
+
+1. EXECUTIVE SUMMARY (2-3 sentences): Quick verdict with hire/strong-hire/maybe/no-hire recommendation.
+
+2. TOP STRENGTHS (2-3 specific strengths): Reference actual answers the candidate gave. Quote specific things they said.
+
+3. CRITICAL GAPS (2-3 areas): Be specific about what was weak. Reference the actual questions where they struggled.
+
+4. SKILL-BY-SKILL BREAKDOWN: For each major topic covered, give a one-line assessment.
+
+5. PERSONALIZED LEARNING ROADMAP: Give 3-5 specific resources, topics, or exercises they should focus on next. Be specific (e.g., "Read Chapter 5 of Designing Data-Intensive Applications" not just "study system design").
+
+6. COMPARISON TO MARKET: How would this candidate compare to the average ${context.difficultyLevel} level ${context.interviewType} candidate in today's market?
+
+Use clear headings (plain text, no markdown). Write professionally but warmly.`;
+    } else if (analysisType === 'detailed') {
+      prompt = `You are a professional technical interviewer providing detailed feedback.
+
+Interview Details:
+- Type: ${context.interviewType}
+- Difficulty: ${context.difficultyLevel}
+- Overall Score: ${avgScore}/100
+
+Questions and Responses:
+${questionsText}
+
+Provide a detailed summary with:
+1. Overall performance assessment (2-3 sentences)
+2. Key strengths demonstrated (reference specific answers)
+3. Areas for improvement (be specific about what was weak)
+4. Recommended topics to study next (3-4 specific suggestions)
+5. Final verdict: hire/maybe/not-ready
+
+Write in clear paragraphs.`;
+    } else {
+      prompt = `You are a professional technical interviewer. Generate a concise interview summary.
 
 Interview Details:
 - Type: ${context.interviewType}
@@ -293,7 +429,10 @@ Provide a professional 3-4 paragraph summary that:
 1. Assesses overall technical knowledge
 2. Highlights strengths observed
 3. Suggests areas for improvement
-4. Recommends next steps (hire/not hire/maybe)`;
+4. Gives a quick verdict`;
+    }
+
+    const maxTokens = analysisType === 'premium' ? 900 : analysisType === 'detailed' ? 600 : 400;
 
     const messages = [
       {
@@ -306,13 +445,12 @@ Provide a professional 3-4 paragraph summary that:
       },
     ];
 
-    console.log('🧠 Calling Cerebras API for interview summary...');
-    const summary = await callCerebras(messages, 500);
-    console.log('✅ Summary generated by Cerebras');
+    console.log(`🧠 Calling Cerebras API for ${analysisType} summary...`);
+    const summary = await callCerebras(messages, maxTokens);
+    console.log(`✅ Summary generated (${analysisType} tier)`);
     return summary;
   } catch (error) {
     console.error('Summary Generation Error:', error.message);
-    // Fallback to mock summary
     console.log('⚠️ Falling back to mock interview summary');
     return `Interview completed successfully. Average score: ${Math.round(questionsData.reduce((sum, q) => sum + q.score, 0) / questionsData.length)}/100`;
   }
