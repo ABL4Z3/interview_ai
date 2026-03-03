@@ -12,6 +12,7 @@ import { ResultsPage } from './pages/ResultsPage';
 import { PricingPage } from './pages/PricingPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { DocsPage } from './pages/DocsPage';
 
 function PrivateRoute({ children }) {
   const { token } = useAuthStore();
@@ -35,6 +36,7 @@ function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/docs" element={<DocsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route

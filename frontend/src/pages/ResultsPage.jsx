@@ -96,6 +96,128 @@ function ScoreBar({ label, score, color = 'blue' }) {
   );
 }
 
+// Smart summary renderer — parses headings and sections into styled cards
+function SummaryRenderer({ summary, isPremium, isDetailed }) {
+  if (!summary) {
+    return (
+      <p className="text-gray-600 dark:text-gray-400 italic">
+        Great job completing this interview! Review the feedback below to identify areas for improvement.
+      </p>
+    );
+  }
+
+  // Section styling map
+  const sectionStyles = {
+    'executive summary': { icon: '📋', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', title: 'text-blue-800 dark:text-blue-300' },
+    'top strengths': { icon: '💪', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-800', title: 'text-green-800 dark:text-green-300' },
+    'critical gaps': { icon: '⚠️', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', title: 'text-red-800 dark:text-red-300' },
+    'skill': { icon: '🎯', bg: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'border-indigo-200 dark:border-indigo-800', title: 'text-indigo-800 dark:text-indigo-300' },
+    'learning roadmap': { icon: '🗺️', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-200 dark:border-purple-800', title: 'text-purple-800 dark:text-purple-300' },
+    'personalized': { icon: '🗺️', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-200 dark:border-purple-800', title: 'text-purple-800 dark:text-purple-300' },
+    'comparison': { icon: '📊', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', title: 'text-amber-800 dark:text-amber-300' },
+    'market': { icon: '📊', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', title: 'text-amber-800 dark:text-amber-300' },
+    'overall': { icon: '📝', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', title: 'text-blue-800 dark:text-blue-300' },
+    'key strengths': { icon: '💪', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-800', title: 'text-green-800 dark:text-green-300' },
+    'areas': { icon: '🔧', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-orange-200 dark:border-orange-800', title: 'text-orange-800 dark:text-orange-300' },
+    'improvement': { icon: '🔧', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-orange-200 dark:border-orange-800', title: 'text-orange-800 dark:text-orange-300' },
+    'recommended': { icon: '📚', bg: 'bg-teal-50 dark:bg-teal-900/20', border: 'border-teal-200 dark:border-teal-800', title: 'text-teal-800 dark:text-teal-300' },
+    'verdict': { icon: '⚖️', bg: 'bg-gray-50 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700', title: 'text-gray-800 dark:text-gray-200' },
+    'final': { icon: '⚖️', bg: 'bg-gray-50 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700', title: 'text-gray-800 dark:text-gray-200' },
+  };
+
+  const getStyle = (heading) => {
+    const lower = heading.toLowerCase();
+    for (const [key, style] of Object.entries(sectionStyles)) {
+      if (lower.includes(key)) return style;
+    }
+    return { icon: '📌', bg: 'bg-gray-50 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700', title: 'text-gray-800 dark:text-gray-200' };
+  };
+
+  // Try to parse numbered sections (e.g. "1. EXECUTIVE SUMMARY" or "TOP STRENGTHS:")
+  const sectionRegex = /(?:^|\n)(?:\d+\.\s*)?([A-Z][A-Z\s\-\/]+(?:BREAKDOWN|SUMMARY|STRENGTHS|GAPS|ROADMAP|COMPARISON|VERDICT|ASSESSMENT|IMPROVEMENT|RECOMMENDED|TOPICS|MARKET|OVERVIEW)?):?\s*(?:\n|$)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = sectionRegex.exec(summary)) !== null) {
+    // Collect text before this heading
+    if (match.index > lastIndex) {
+      const before = summary.slice(lastIndex, match.index).trim();
+      if (before) parts.push({ type: 'text', content: before });
+    }
+    parts.push({ type: 'heading', content: match[1].trim() });
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Remaining text
+  if (lastIndex < summary.length) {
+    const remaining = summary.slice(lastIndex).trim();
+    if (remaining) parts.push({ type: 'text', content: remaining });
+  }
+
+  // If no headings found, render as styled paragraphs
+  if (!parts.some(p => p.type === 'heading')) {
+    const paragraphs = summary.split(/\n\n+/).filter(p => p.trim());
+    return (
+      <div className="space-y-4">
+        {paragraphs.map((para, i) => (
+          <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">{para.trim()}</p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Group parts into sections: heading + following text blocks
+  const sections = [];
+  let currentSection = null;
+
+  parts.forEach(part => {
+    if (part.type === 'heading') {
+      if (currentSection) sections.push(currentSection);
+      currentSection = { heading: part.content, text: [] };
+    } else if (currentSection) {
+      currentSection.text.push(part.content);
+    } else {
+      // Text before any heading
+      sections.push({ heading: null, text: [part.content] });
+    }
+  });
+  if (currentSection) sections.push(currentSection);
+
+  return (
+    <div className="space-y-4">
+      {sections.map((section, i) => {
+        if (!section.heading) {
+          return (
+            <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">{section.text.join('\n')}</p>
+            </div>
+          );
+        }
+
+        const style = getStyle(section.heading);
+        const content = section.text.join('\n').trim();
+
+        return (
+          <div key={i} className={`${style.bg} rounded-xl p-5 border ${style.border}`}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">{style.icon}</span>
+              <h4 className={`font-bold text-sm uppercase tracking-wider ${style.title}`}>
+                {section.heading.replace(/^\d+\.\s*/, '')}
+              </h4>
+            </div>
+            <div className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+              {content}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ResultsPage() {
   const { interviewId } = useParams();
   const navigate = useNavigate();
@@ -259,15 +381,20 @@ export function ResultsPage() {
 
         {/* AI Summary */}
         <Card className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              {isPremium ? 'Expert Analysis Report' : isDetailed ? 'Detailed Analysis' : 'AI Summary'}
-            </h3>
+          <div className="flex items-center gap-3 mb-6">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isPremium ? 'bg-purple-100 dark:bg-purple-900/40' : isDetailed ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-700'}`}>
+              <span className="text-lg">{isPremium ? '👑' : isDetailed ? '📊' : '📝'}</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                {isPremium ? 'Expert Analysis Report' : isDetailed ? 'Detailed Analysis' : 'AI Summary'}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {isPremium ? 'Premium tier — comprehensive report with learning roadmap' : isDetailed ? 'Detailed tier — in-depth performance breakdown' : 'Basic tier — quick performance overview'}
+              </p>
+            </div>
           </div>
-          <div className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
-            {currentInterview.summary || 
-              'Great job completing this interview! Review the feedback below to identify areas for improvement.'}
-          </div>
+          <SummaryRenderer summary={currentInterview.summary} isPremium={isPremium} isDetailed={isDetailed} />
         </Card>
 
         {/* Questions & Answers */}

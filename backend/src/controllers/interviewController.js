@@ -277,7 +277,7 @@ export const processAudio = asyncHandler(async (req, res) => {
  */
 export const getInterviewHistory = asyncHandler(async (req, res) => {
   const userId = req.user.userId;
-  const { limit = 10, skip = 0 } = req.query;
+  const { limit = 50, skip = 0 } = req.query;
 
   const interviews = await Interview.find({ userId })
     .sort({ createdAt: -1 })

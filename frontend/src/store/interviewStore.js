@@ -4,6 +4,7 @@ import apiClient from '../services/apiClient';
 export const useInterviewStore = create((set) => ({
   currentInterview: null,
   interviewHistory: [],
+  totalInterviewCount: 0,
   loading: false,
   error: null,
 
@@ -88,8 +89,13 @@ export const useInterviewStore = create((set) => ({
       const response = await apiClient.get('/interview/user/history', {
         params: { page, limit },
       });
-      set({ interviewHistory: response.data.data.interviews || response.data.data, loading: false });
-      return response.data.data;
+      const data = response.data.data;
+      set({
+        interviewHistory: data.interviews || data,
+        totalInterviewCount: data.total || (data.interviews || data).length,
+        loading: false,
+      });
+      return data;
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch history';
       set({ error: errorMessage, loading: false });

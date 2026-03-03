@@ -224,6 +224,7 @@ export function LandingPage() {
               <h4 className="text-white font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
                 <li><button onClick={() => navigate('/pricing')} className="hover:text-white transition">Pricing</button></li>
+                <li><button onClick={() => navigate('/docs')} className="hover:text-white transition">Documentation</button></li>
                 <li><button onClick={() => navigate('/register')} className="hover:text-white transition">Sign Up</button></li>
               </ul>
             </div>

@@ -11,7 +11,7 @@ import { formatDate } from '../utils/formatters';
 export function DashboardPage() {
   const navigate = useNavigate();
   const { currentUser, getMe } = useAuthStore();
-  const { interviewHistory, getHistory, loading } = useInterviewStore();
+  const { interviewHistory, totalInterviewCount, getHistory, loading } = useInterviewStore();
   const [selectedType, setSelectedType] = useState('frontend');
   const [selectedLevel, setSelectedLevel] = useState('beginner');
   const [selectedDuration, setSelectedDuration] = useState('standard');
@@ -318,7 +318,7 @@ export function DashboardPage() {
                 <div>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">Total Interviews</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {interviewHistory.length}
+                    {totalInterviewCount}
                   </p>
                 </div>
               </div>
