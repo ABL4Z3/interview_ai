@@ -244,8 +244,8 @@ export function LandingPage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><button className="hover:text-white transition">Privacy Policy</button></li>
-                <li><button className="hover:text-white transition">Terms of Service</button></li>
+                <li><button onClick={() => navigate('/privacy')} className="hover:text-white transition">Privacy Policy</button></li>
+                <li><button onClick={() => navigate('/terms')} className="hover:text-white transition">Terms of Service</button></li>
               </ul>
             </div>
           </div>

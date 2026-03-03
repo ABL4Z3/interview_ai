@@ -10,6 +10,8 @@ import { InterviewRoomPage } from './pages/InterviewRoomPage';
 import { LiveInterviewPage } from './pages/LiveInterviewPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { PricingPage } from './pages/PricingPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
 
 function PrivateRoute({ children }) {
   const { token } = useAuthStore();
@@ -31,6 +33,8 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
