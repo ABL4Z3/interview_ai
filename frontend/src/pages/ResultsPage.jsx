@@ -10,9 +10,11 @@ import { formatDate, getScoreColor, getScoreBgColor } from '../utils/formatters'
 // CSS-only radar chart using clip-path polygon
 function RadarChart({ categories }) {
   // categories: [{label, score}] — 5 items
-  const size = 200;
-  const center = size / 2;
-  const maxRadius = 80;
+  const padding = 40; // extra space for labels
+  const chartSize = 200;
+  const totalSize = chartSize + padding * 2;
+  const center = totalSize / 2;
+  const maxRadius = 75;
   const levels = [20, 40, 60, 80, 100];
   const angleStep = (2 * Math.PI) / categories.length;
   const startAngle = -Math.PI / 2; // Start from top
@@ -36,7 +38,7 @@ function RadarChart({ categories }) {
 
   return (
     <div className="flex flex-col items-center">
-      <svg viewBox={`0 0 ${size} ${size}`} className="w-56 h-56">
+      <svg viewBox={`0 0 ${totalSize} ${totalSize}`} className="w-64 h-64" overflow="visible">
         {/* Grid lines */}
         {gridPolygons.map((points, i) => (
           <polygon key={i} points={points} fill="none" stroke="currentColor" className="text-gray-200 dark:text-gray-700" strokeWidth="0.5" />
@@ -52,12 +54,12 @@ function RadarChart({ categories }) {
         {dataPoints.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r="3" fill="#3b82f6" />
         ))}
-        {/* Labels */}
+        {/* Labels — placed further out with padding space */}
         {categories.map((c, i) => {
-          const labelPoint = getPoint(i, 125);
+          const labelPoint = getPoint(i, 130);
           return (
             <text key={i} x={labelPoint.x} y={labelPoint.y} textAnchor="middle" dominantBaseline="middle"
-              className="fill-gray-700 dark:fill-gray-300" fontSize="7" fontWeight="500">
+              className="fill-gray-700 dark:fill-gray-300" fontSize="9" fontWeight="600">
               {c.label}
             </text>
           );

@@ -644,14 +644,39 @@ async def save_interview_results(interview_id, transcript_data, backend_url, api
 async def entrypoint(ctx: JobContext):
     await ctx.connect()
 
-    # Extract interview metadata from room metadata
     room = ctx.room
     metadata = {}
+
+    # 1) Try room-level metadata first
     try:
         if room.metadata:
             metadata = json.loads(room.metadata)
     except (json.JSONDecodeError, TypeError):
         pass
+
+    # 2) Fallback: read participant metadata (backend sets it on the user token)
+    if not metadata:
+        for participant in room.remote_participants.values():
+            try:
+                if participant.metadata:
+                    metadata = json.loads(participant.metadata)
+                    break
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+    # 3) If still empty, wait briefly for a participant to connect with metadata
+    if not metadata:
+        for _ in range(30):  # up to 15 seconds
+            await asyncio.sleep(0.5)
+            for participant in room.remote_participants.values():
+                try:
+                    if participant.metadata:
+                        metadata = json.loads(participant.metadata)
+                        break
+                except (json.JSONDecodeError, TypeError):
+                    continue
+            if metadata:
+                break
 
     interview_type = metadata.get("interviewType", "fullstack")
     difficulty_level = metadata.get("difficultyLevel", "intermediate")
