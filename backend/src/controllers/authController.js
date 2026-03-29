@@ -140,6 +140,7 @@ export const getMe = asyncHandler(async (req, res) => {
       subscriptionPlan: user.subscriptionPlan,
       totalInterviews: user.totalInterviews,
       credits: user.credits,
+      termsAccepted: user.termsAccepted,
     }, 'User retrieved successfully')
   );
 });

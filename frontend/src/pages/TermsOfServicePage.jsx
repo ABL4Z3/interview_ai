@@ -63,12 +63,43 @@ export function TermsOfServicePage() {
               <li>Credits are non-transferable between accounts.</li>
             </ul>
 
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-4 mb-2">4.2 Payments &amp; Refunds</h3>
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-4 mb-2">4.2 Payment Terms and No-Refund Policy</h3>
+            <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-4 rounded">
+              <p className="font-bold text-red-900 dark:text-red-200 mb-2">
+                ALL PURCHASES ARE FINAL AND NON-REFUNDABLE
+              </p>
+              <p className="text-red-800 dark:text-red-300 text-sm">
+                By purchasing credits or subscribing to any plan, you explicitly acknowledge
+                and agree that all sales are final. We do not offer refunds under any circumstances.
+              </p>
+            </div>
             <ul className="list-disc list-inside space-y-2 ml-2">
-              <li>All payments are processed securely through Razorpay.</li>
-              <li>Prices are displayed in INR (₹) and USD ($). The applicable currency is selected at the time of purchase.</li>
-              <li>All sales are final. Refunds may be issued at our sole discretion in cases of technical failure that prevented the use of purchased credits.</li>
-              <li>We reserve the right to modify pricing at any time. Existing purchased credits will not be affected by price changes.</li>
+              <li>
+                <strong>No Refunds:</strong> We do not offer refunds, returns, or credits for unused
+                credits, subscription time, service dissatisfaction, change of mind, technical issues,
+                duplicate purchases, or any other reason.
+              </li>
+              <li>
+                <strong>Payment Processing:</strong> All payments are processed securely through Razorpay
+                and are charged immediately. Transactions cannot be cancelled once initiated.
+              </li>
+              <li>
+                <strong>Chargeback Prohibition:</strong> Initiating a chargeback or payment dispute instead
+                of contacting us directly will result in immediate account termination and may result in
+                legal action to recover costs and damages.
+              </li>
+              <li>
+                <strong>Account Termination:</strong> Termination, suspension, or deletion of your account
+                for any reason, including violation of these Terms, does not entitle you to refunds or credits.
+              </li>
+              <li>
+                <strong>Price Changes:</strong> We reserve the right to modify pricing at any time.
+                Existing purchased credits will not be affected by price changes.
+              </li>
+              <li>
+                <strong>Legal Waiver:</strong> You explicitly waive any right to claim refunds under consumer
+                protection laws to the maximum extent permitted by law.
+              </li>
             </ul>
           </section>
 

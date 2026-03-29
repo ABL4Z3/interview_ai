@@ -10,14 +10,16 @@ import {
   completeLiveInterview,
 } from '../controllers/interviewController.js';
 import verifyJWT from '../middleware/auth.js';
+import verifyTermsAcceptance from '../middleware/termsAcceptance.js';
 
 const router = express.Router();
 
 // Agent callback route (no JWT - uses x-agent-api-key header)
 router.post('/:id/save-live-results', saveLiveResults);
 
-// All remaining interview routes require authentication
+// All remaining interview routes require authentication and terms acceptance
 router.use(verifyJWT);
+router.use(verifyTermsAcceptance);
 
 // Interview management
 router.post('/start', startInterview);

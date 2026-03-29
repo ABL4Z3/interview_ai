@@ -117,6 +117,7 @@ userSchema.methods.getJWT = function () {
     email: this.email,
     name: this.name,
     subscriptionPlan: this.subscriptionPlan,
+    termsAccepted: this.termsAccepted,
   };
 };
 

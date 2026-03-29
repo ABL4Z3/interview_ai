@@ -48,8 +48,12 @@ export function LoginPage() {
   const handleGoogleSuccess = async (credentialResponse) => {
     setLocalError('');
     try {
-      await googleLogin(credentialResponse.credential);
-      navigate('/dashboard');
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.requiresTermsAcceptance) {
+        navigate('/accept-terms');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setLocalError(err.response?.data?.message || 'Google sign-in failed');
     }

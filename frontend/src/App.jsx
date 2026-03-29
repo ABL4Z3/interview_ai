@@ -12,11 +12,22 @@ import { ResultsPage } from './pages/ResultsPage';
 import { PricingPage } from './pages/PricingPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { TermsAcceptancePage } from './pages/TermsAcceptancePage';
 import { DocsPage } from './pages/DocsPage';
 
 function PrivateRoute({ children }) {
-  const { token } = useAuthStore();
-  return token ? children : <Navigate to="/login" />;
+  const { token, currentUser } = useAuthStore();
+
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+
+  // If user hasn't accepted terms, redirect to terms acceptance page
+  if (currentUser && !currentUser.termsAccepted) {
+    return <Navigate to="/accept-terms" />;
+  }
+
+  return children;
 }
 
 function App() {
@@ -39,6 +50,14 @@ function App() {
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/accept-terms"
+          element={
+            <PrivateRoute>
+              <TermsAcceptancePage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={

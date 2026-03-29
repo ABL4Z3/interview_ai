@@ -19,13 +19,14 @@ export function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
+    termsAccepted: false,
   });
   const [localError, setLocalError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
@@ -38,6 +39,7 @@ export function RegisterPage() {
     else if (formData.password.length < 8) errors.password = 'Password must be at least 8 characters';
     if (!formData.confirmPassword) errors.confirmPassword = 'Please confirm your password';
     else if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+    if (!formData.termsAccepted) errors.termsAccepted = 'You must accept the Terms of Service to continue';
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -47,7 +49,7 @@ export function RegisterPage() {
     setLocalError('');
     if (!validate()) return;
     try {
-      await register(formData.email, formData.password, formData.name);
+      await register(formData.email, formData.password, formData.name, true, '1.0');
       navigate('/dashboard');
     } catch (err) {
       setLocalError(err.response?.data?.message || 'Registration failed');
@@ -57,8 +59,12 @@ export function RegisterPage() {
   const handleGoogleSuccess = async (credentialResponse) => {
     setLocalError('');
     try {
-      await googleLogin(credentialResponse.credential);
-      navigate('/dashboard');
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.requiresTermsAcceptance) {
+        navigate('/accept-terms');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setLocalError(err.response?.data?.message || 'Google sign-in failed');
     }
@@ -132,7 +138,27 @@ export function RegisterPage() {
             {fieldErrors.confirmPassword && <p className="mt-1 text-sm text-red-500">{fieldErrors.confirmPassword}</p>}
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <div className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="termsAccepted"
+              name="termsAccepted"
+              checked={formData.termsAccepted}
+              onChange={handleChange}
+              className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="termsAccepted" className="text-sm text-gray-700 dark:text-gray-300">
+              I agree to the{' '}
+              <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-semibold underline" target="_blank">
+                Terms of Service
+              </Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="text-blue-600 hover:text-blue-700 font-semibold underline" target="_blank">
+                Privacy Policy
+              </Link>
+            </label>
+          </div>
+          {fieldErrors.termsAccepted && <p className="text-sm text-red-500">{fieldErrors.termsAccepted}</p>}
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
         </form>

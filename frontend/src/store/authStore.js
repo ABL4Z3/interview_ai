@@ -12,13 +12,15 @@ export const useAuthStore = create((set) => ({
     set({ token });
   },
 
-  register: async (email, password, name) => {
+  register: async (email, password, name, termsAccepted = false, termsVersion = '1.0') => {
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post('/auth/register', {
         name,
         email,
         password,
+        termsAccepted,
+        termsVersion,
       });
       const { token, user } = response.data.data;
       set({ token, currentUser: user, loading: false });
@@ -58,10 +60,10 @@ export const useAuthStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.post('/auth/google', { credential });
-      const { token, user } = response.data.data;
+      const { token, user, requiresTermsAcceptance } = response.data.data;
       set({ token, currentUser: user, loading: false });
       localStorage.setItem('token', token);
-      return response.data.data;
+      return { ...response.data.data, requiresTermsAcceptance };
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Google sign-in failed';
       set({ error: errorMessage, loading: false });
@@ -79,4 +81,20 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-}));
+
+  acceptTerms: async (termsAccepted = true, termsVersion = '1.0') => {
+    set({ loading: true, error: null });
+    try {
+      const response = await apiClient.post('/auth/accept-terms', {
+        termsAccepted,
+        termsVersion,
+      });
+      const { user } = response.data.data;
+      set({ currentUser: user, loading: false });
+      return response.data.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to accept terms';
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },

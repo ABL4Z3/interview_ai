@@ -7,15 +7,16 @@ import {
   getPaymentHistory,
 } from '../controllers/paymentController.js';
 import verifyJWT from '../middleware/auth.js';
+import verifyTermsAcceptance from '../middleware/termsAcceptance.js';
 
 const router = express.Router();
 
 // Public route - get plans
 router.get('/plans', getPlans);
 
-// Protected routes
-router.post('/create-order', verifyJWT, createPaymentOrder);
-router.post('/verify', verifyJWT, verifyPaymentHandler);
-router.get('/history', verifyJWT, getPaymentHistory);
+// Protected routes requiring terms acceptance
+router.post('/create-order', verifyJWT, verifyTermsAcceptance, createPaymentOrder);
+router.post('/verify', verifyJWT, verifyTermsAcceptance, verifyPaymentHandler);
+router.get('/history', verifyJWT, verifyTermsAcceptance, getPaymentHistory);
 
 export default router;
