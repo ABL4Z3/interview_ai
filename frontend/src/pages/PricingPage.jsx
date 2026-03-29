@@ -170,9 +170,9 @@ export function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Navigation */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <h1
@@ -184,7 +184,7 @@ export function PricingPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/docs')}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
               >
                 <BookOpen className="w-5 h-5" />
                 <span className="hidden sm:inline">Docs</span>
@@ -197,7 +197,7 @@ export function PricingPage() {
                 <>
                   <button
                     onClick={() => navigate('/login')}
-                    className="text-gray-600 hover:text-gray-900 font-medium hidden sm:block"
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium hidden sm:block"
                   >
                     Sign In
                   </button>
@@ -215,22 +215,22 @@ export function PricingPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <div className="inline-block mb-4">
-              <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-semibold">PRICING</span>
+              <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-4 py-1 rounded-full text-sm font-semibold">PRICING</span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4">
               Transparent, Simple Pricing
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Start free and upgrade anytime. Scale your interview prep to match your goals.
             </p>
 
             {/* Currency Toggle */}
             <div className="flex items-center justify-center gap-3 mt-8">
-              <span className={`text-sm font-medium transition-colors ${currency === 'INR' ? 'text-gray-900' : 'text-gray-400'}`}>₹ INR</span>
+              <span className={`text-sm font-medium transition-colors ${currency === 'INR' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}`}>₹ INR</span>
               <button
                 onClick={() => setCurrency(c => c === 'INR' ? 'USD' : 'INR')}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  currency === 'USD' ? 'bg-blue-600' : 'bg-gray-300'
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+                  currency === 'USD' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
                 }`}
                 role="switch"
                 aria-checked={currency === 'USD'}
@@ -239,7 +239,7 @@ export function PricingPage() {
                   currency === 'USD' ? 'translate-x-7' : 'translate-x-1'
                 }`} />
               </button>
-              <span className={`text-sm font-medium transition-colors ${currency === 'USD' ? 'text-gray-900' : 'text-gray-400'}`}>$ USD</span>
+              <span className={`text-sm font-medium transition-colors ${currency === 'USD' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}`}>$ USD</span>
             </div>
           </div>
 
@@ -259,13 +259,13 @@ export function PricingPage() {
                 <Card
                   className={`relative p-6 md:p-8 flex flex-col h-full transition-all duration-300 ${
                     plan.popular
-                      ? 'border-2 border-blue-600 shadow-2xl md:scale-105 bg-blue-50'
-                      : 'border border-gray-200 hover:shadow-lg'
-                  }`}
+                      ? 'border-2 border-blue-600 shadow-2xl md:scale-105 bg-blue-50 dark:bg-blue-900/30'
+                      : 'border border-gray-200 dark:border-gray-700 hover:shadow-lg'
+                  } bg-white dark:bg-gray-800`}
                 >
                   {plan.badge && plan.popular && (
                     <div className="absolute top-8 right-4">
-                      <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
+                      <span className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 text-xs font-bold px-3 py-1 rounded-full">
                         {plan.badge}
                       </span>
                     </div>
@@ -273,30 +273,30 @@ export function PricingPage() {
 
                   {/* Plan Header */}
                   <div className="mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                    <p className="text-gray-600 text-sm">{plan.description}</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">{plan.description}</p>
                   </div>
 
                   {/* Pricing */}
-                  <div className="mb-6 pb-6 border-b border-gray-200">
+                  <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-bold text-gray-900">
+                      <span className="text-5xl font-bold text-gray-900 dark:text-white">
                         {getPrice(plan) === 0 ? 'Free' : `${currencySymbol}${getPrice(plan)}`}
                       </span>
-                      {getPrice(plan) > 0 && <span className="text-gray-600 text-sm">/one-time</span>}
+                      {getPrice(plan) > 0 && <span className="text-gray-600 dark:text-gray-400 text-sm">/one-time</span>}
                     </div>
-                    <p className="text-2xl font-bold text-blue-600 mt-2">{plan.credits} credits</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">{plan.credits} credits</p>
                     {getPrice(plan) > 0 && (
-                      <p className="text-xs text-gray-600 mt-2">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                         {currencySymbol}{plan.perCredit}/credit
                       </p>
                     )}
                   </div>
 
                   {/* Interview Count */}
-                  <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Practice Interviews</p>
-                    <p className="text-2xl font-bold text-blue-600">{plan.interviews}</p>
+                  <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Practice Interviews</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{plan.interviews}</p>
                   </div>
 
                   {/* Features */}
@@ -306,9 +306,9 @@ export function PricingPage() {
                         {feature.included ? (
                           <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                         ) : (
-                          <X className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" />
+                          <X className="w-5 h-5 text-gray-300 dark:text-gray-600 flex-shrink-0 mt-0.5" />
                         )}
-                        <span className={feature.included ? 'text-gray-700 text-sm' : 'text-gray-400 text-sm'}>
+                        <span className={feature.included ? 'text-gray-700 dark:text-gray-300 text-sm' : 'text-gray-400 dark:text-gray-600 text-sm'}>
                           {feature.text}
                         </span>
                       </li>
@@ -334,17 +334,17 @@ export function PricingPage() {
 
           {/* Comparison Table */}
           <div className="max-w-5xl mx-auto mb-20">
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900">What's Included in Each Plan</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">What's Included in Each Plan</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left px-8 py-4 font-semibold text-gray-900">Feature</th>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left px-8 py-4 font-semibold text-gray-900 dark:text-white">Feature</th>
                       {plans.map(plan => (
-                        <th key={plan.id} className="text-center px-6 py-4 font-semibold text-gray-900 text-sm">{plan.name}</th>
+                        <th key={plan.id} className="text-center px-6 py-4 font-semibold text-gray-900 dark:text-white text-sm">{plan.name}</th>
                       ))}
                     </tr>
                   </thead>
@@ -358,10 +358,10 @@ export function PricingPage() {
                       { label: 'Performance Reports', values: ['Basic', 'Standard', 'Advanced', 'Advanced+'] },
                       { label: 'Support', values: ['Community', 'Email 24h', 'Chat & Email', '24/7 VIP'] },
                     ].map((row, idx) => (
-                      <tr key={idx} className="border-b border-gray-100">
-                        <td className="px-8 py-4 font-medium text-gray-900">{row.label}</td>
+                      <tr key={idx} className="border-b border-gray-100 dark:border-gray-700">
+                        <td className="px-8 py-4 font-medium text-gray-900 dark:text-white">{row.label}</td>
                         {row.values.map((value, i) => (
-                          <td key={i} className="text-center px-6 py-4 text-sm text-gray-700">
+                          <td key={i} className="text-center px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                             {value}
                           </td>
                         ))}
@@ -374,8 +374,8 @@ export function PricingPage() {
           </div>
 
           {/* FAQ */}
-          <div className="max-w-3xl mx-auto bg-white rounded-xl p-8 border border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Frequently Asked Questions</h2>
+          <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Frequently Asked Questions</h2>
             <div className="space-y-6">
               {[
                 {
@@ -400,8 +400,8 @@ export function PricingPage() {
                 },
               ].map((faq, idx) => (
                 <div key={idx}>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{faq.q}</h3>
-                  <p className="text-gray-600">{faq.a}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{faq.q}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{faq.a}</p>
                 </div>
               ))}
             </div>
@@ -410,7 +410,7 @@ export function PricingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12 mt-20">
+      <footer className="bg-gray-900 dark:bg-gray-950 text-gray-400 py-12 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
           <p>© {new Date().getFullYear()} IntervuAI. All rights reserved. | Non-refundable purchases</p>
         </div>
