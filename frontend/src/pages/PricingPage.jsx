@@ -123,7 +123,8 @@ export function PricingPage() {
 
     setProcessing(planId);
     try {
-      const response = await apiClient.post('/payment/create-order', { plan: planId, currency });
+      const backendPlanId = planId === 'basic' ? 'starter' : planId;
+      const response = await apiClient.post('/payment/create-order', { plan: backendPlanId, currency });
       const { orderId, amount, currency: orderCurrency, keyId } = response.data.data;
 
       const options = {
