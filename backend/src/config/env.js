@@ -7,6 +7,7 @@ const env = {
   // Server
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT) || 3000,
+  HOST: process.env.HOST || '0.0.0.0',
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
   API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:3000',
 

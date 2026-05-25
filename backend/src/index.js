@@ -114,11 +114,11 @@ const startServer = async () => {
     await connectDB();
 
     // Start listening
-    app.listen(env.PORT, () => {
+    app.listen(env.PORT, env.HOST, () => {
       console.log(`\n${'='.repeat(60)}`);
       console.log(`🤖 IntervuAI Backend Server`);
       console.log(`${'='.repeat(60)}`);
-      console.log(`✓ Server running on http://localhost:${env.PORT}`);
+      console.log(`✓ Server listening on ${env.HOST}:${env.PORT}`);
       console.log(`✓ Environment: ${env.NODE_ENV}`);
       console.log(`✓ Database: ${maskConnectionString(env.MONGODB_URI)}`);
       console.log(`✓ Frontend URL: ${env.FRONTEND_URL}`);
