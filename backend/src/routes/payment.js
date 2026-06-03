@@ -2,6 +2,7 @@
 import express from 'express';
 import {
   getPlans,
+  getFirestoreStatus,
   createPaymentOrder,
   verifyPaymentHandler,
   getPaymentHistory,
@@ -15,6 +16,7 @@ const router = express.Router();
 router.get('/plans', getPlans);
 
 // Protected routes requiring terms acceptance
+router.get('/firestore-status', verifyJWT, getFirestoreStatus);
 router.post('/create-order', verifyJWT, verifyTermsAcceptance, createPaymentOrder);
 router.post('/verify', verifyJWT, verifyTermsAcceptance, verifyPaymentHandler);
 router.get('/history', verifyJWT, verifyTermsAcceptance, getPaymentHistory);

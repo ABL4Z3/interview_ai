@@ -3,6 +3,8 @@ import env from '../config/env.js';
 
 let firestoreDb = null;
 let initializationAttempted = false;
+let lastInitError = null;
+let lastLoggedTransactionAt = null;
 
 function normalizePrivateKey(value) {
   return value?.replace(/\\n/g, '\n');
@@ -47,6 +49,7 @@ function getFirestoreDb() {
   try {
     const serviceAccount = getServiceAccountFromEnv();
     if (!serviceAccount) {
+      lastInitError = 'Firebase Admin credentials are not configured';
       console.warn('[Firestore] Unified transaction logging skipped: Firebase Admin credentials are not configured.');
       return null;
     }
@@ -58,9 +61,11 @@ function getFirestoreDb() {
     }
 
     firestoreDb = admin.firestore();
+    lastInitError = null;
     console.log('[Firestore] Unified transaction logging enabled.');
     return firestoreDb;
   } catch (error) {
+    lastInitError = error.message;
     console.error('[Firestore] Failed to initialize Firebase Admin:', error.message);
     return null;
   }
@@ -104,6 +109,7 @@ export async function saveUnifiedTransaction({
   };
 
   await transactionRef.set(transactionRecord, { merge: true });
+  lastLoggedTransactionAt = new Date().toISOString();
   console.log('[Firestore] Unified transaction logged:', {
     transactionId,
     appId: env.APP_ID,
@@ -114,6 +120,22 @@ export async function saveUnifiedTransaction({
   return { logged: true, transactionId };
 }
 
+export function getFirestoreTransactionStatus() {
+  return {
+    enabled: env.FIRESTORE_TRANSACTIONS_ENABLED,
+    initialized: Boolean(firestoreDb),
+    initializationAttempted,
+    hasServiceAccountJson: Boolean(env.FIREBASE_SERVICE_ACCOUNT_JSON),
+    hasSplitCredentials: Boolean(env.FIREBASE_PROJECT_ID && env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY),
+    projectIdConfigured: Boolean(env.FIREBASE_PROJECT_ID || env.FIREBASE_SERVICE_ACCOUNT_JSON),
+    collection: env.FIRESTORE_TRANSACTIONS_COLLECTION,
+    appId: env.APP_ID,
+    lastInitError,
+    lastLoggedTransactionAt,
+  };
+}
+
 export default {
   saveUnifiedTransaction,
+  getFirestoreTransactionStatus,
 };

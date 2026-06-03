@@ -3,7 +3,10 @@ import Payment from '../models/Payment.js';
 import User from '../models/User.js';
 import { ApiResponse, ApiError, asyncHandler } from '../utils/apiResponse.js';
 import { createOrder, verifyPayment, PLANS } from '../services/paymentService.js';
-import { saveUnifiedTransaction } from '../services/firestoreTransactionService.js';
+import {
+  getFirestoreTransactionStatus,
+  saveUnifiedTransaction,
+} from '../services/firestoreTransactionService.js';
 
 /**
  * Get available plans
@@ -11,6 +14,21 @@ import { saveUnifiedTransaction } from '../services/firestoreTransactionService.
  */
 export const getPlans = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, PLANS, 'Plans retrieved successfully'));
+});
+
+/**
+ * Get Firestore unified transaction logger status.
+ * @route GET /api/payment/firestore-status
+ * @middleware verifyJWT
+ */
+export const getFirestoreStatus = asyncHandler(async (req, res) => {
+  res.json(
+    new ApiResponse(
+      200,
+      getFirestoreTransactionStatus(),
+      'Firestore transaction logger status retrieved'
+    )
+  );
 });
 
 /**
@@ -162,6 +180,7 @@ export const getPaymentHistory = asyncHandler(async (req, res) => {
 
 export default {
   getPlans,
+  getFirestoreStatus,
   createPaymentOrder,
   verifyPaymentHandler,
   getPaymentHistory,
