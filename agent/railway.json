@@ -5,7 +5,7 @@
     "buildCommand": "pip install -r requirements.txt"
   },
   "deploy": {
-    "startCommand": "python app.py dev",
+    "startCommand": "python app.py start",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
